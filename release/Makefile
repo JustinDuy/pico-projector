@@ -15,7 +15,7 @@ CXX           = g++
 DEFINES       = -DQT_QML_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I../../pico-projector -I. -I/usr/local/include/opencv -I../../Qt/5.5/gcc_64/include -I../../Qt/5.5/gcc_64/include/QtWidgets -I../../Qt/5.5/gcc_64/include/QtGui -I../../Qt/5.5/gcc_64/include/QtCore -I. -I../../Qt/5.5/gcc_64/mkspecs/linux-g++
+INCPATH       = -I../../pico-projector -I. -I/usr/local/include/opencv2 -I/usr/local/include/opencv -I../../Qt/5.5/gcc_64/include -I../../Qt/5.5/gcc_64/include/QtWidgets -I../../Qt/5.5/gcc_64/include/QtGui -I../../Qt/5.5/gcc_64/include/QtCore -I. -I../../Qt/5.5/gcc_64/mkspecs/linux-g++
 QMAKE         = /home/duy/Qt/5.5/gcc_64/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -36,7 +36,7 @@ DISTNAME      = pico-projector1.0.0
 DISTDIR = /home/duy/pico-projector/release/.tmp/pico-projector1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-rpath,/home/duy/Qt/5.5/gcc_64 -Wl,-rpath,/home/duy/Qt/5.5/gcc_64/lib
-LIBS          = $(SUBLIBS) -L/usr/local/lib -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video -lopencv_features2d -lopencv_calib3d -lopencv_objdetect -lopencv_flann -L/home/duy/Qt/5.5/gcc_64/lib -lQt5Widgets -L/usr/lib64 -lQt5Gui -lQt5Core -lGL -lpthread 
+LIBS          = $(SUBLIBS) `pkg-config opencv --libs` -L/home/duy/Qt/5.5/gcc_64/lib -lQt5Widgets -L/usr/lib64 -lQt5Gui -lQt5Core -lGL -lpthread 
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -49,9 +49,11 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = ../main.cpp \
-		../myqwidget.cpp moc_myqwidget.cpp
+		../myqwidget.cpp \
+		../utility.cpp moc_myqwidget.cpp
 OBJECTS       = main.o \
 		myqwidget.o \
+		utility.o \
 		moc_myqwidget.o
 DIST          = ../../../Qt/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../Qt/5.5/gcc_64/mkspecs/common/unix.conf \
@@ -188,8 +190,10 @@ DIST          = ../../../Qt/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../Qt/5.5/gcc_64/mkspecs/features/exceptions.prf \
 		../../../Qt/5.5/gcc_64/mkspecs/features/yacc.prf \
 		../../../Qt/5.5/gcc_64/mkspecs/features/lex.prf \
-		../../pico-projector.pro ../myqwidget.h ../main.cpp \
-		../myqwidget.cpp
+		../../pico-projector.pro ../myqwidget.h \
+		../utility.h ../main.cpp \
+		../myqwidget.cpp \
+		../utility.cpp
 QMAKE_TARGET  = pico-projector
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = pico-projector
@@ -513,8 +517,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents ../myqwidget.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../main.cpp ../myqwidget.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../myqwidget.h ../utility.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../main.cpp ../myqwidget.cpp ../utility.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -643,7 +647,7 @@ moc_myqwidget.cpp: ../../Qt/5.5/gcc_64/include/QtWidgets/QWidget \
 		../../Qt/5.5/gcc_64/include/QtGui/qvector2d.h \
 		../../Qt/5.5/gcc_64/include/QtGui/qtouchdevice.h \
 		../myqwidget.h
-	/home/duy/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/home/duy/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/duy/pico-projector -I/usr/local/include/opencv -I/home/duy/Qt/5.5/gcc_64/include -I/home/duy/Qt/5.5/gcc_64/include/QtWidgets -I/home/duy/Qt/5.5/gcc_64/include/QtGui -I/home/duy/Qt/5.5/gcc_64/include/QtCore -I. ../myqwidget.h -o moc_myqwidget.cpp
+	/home/duy/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/home/duy/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/duy/pico-projector -I/usr/local/include/opencv2 -I/usr/local/include/opencv -I/home/duy/Qt/5.5/gcc_64/include -I/home/duy/Qt/5.5/gcc_64/include/QtWidgets -I/home/duy/Qt/5.5/gcc_64/include/QtGui -I/home/duy/Qt/5.5/gcc_64/include/QtCore -I. ../myqwidget.h -o moc_myqwidget.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -893,6 +897,9 @@ myqwidget.o: ../myqwidget.cpp ../myqwidget.h \
 		../../Qt/5.5/gcc_64/include/QtWidgets/qlabel.h \
 		../../Qt/5.5/gcc_64/include/QtWidgets/qframe.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o myqwidget.o ../myqwidget.cpp
+
+utility.o: ../utility.cpp ../utility.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o utility.o ../utility.cpp
 
 moc_myqwidget.o: moc_myqwidget.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_myqwidget.o moc_myqwidget.cpp
