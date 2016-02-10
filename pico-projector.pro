@@ -13,21 +13,16 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-    myqwidget.cpp
+    myqwidget.cpp \
+    utility.cpp
 
 HEADERS  += \
-    myqwidget.h
+    myqwidget.h \
+    utility.h
 
+INCLUDEPATH += /usr/local/include/opencv2
 INCLUDEPATH += /usr/local/include/opencv
-LIBS += -L/usr/local/lib \
--lopencv_core \
--lopencv_imgproc \
--lopencv_highgui \
--lopencv_ml \
--lopencv_video \
--lopencv_features2d \
--lopencv_calib3d \
--lopencv_objdetect \
--lopencv_flann
+
+LIBS += `pkg-config opencv --libs`
 
 FORMS    +=
