@@ -14,6 +14,8 @@
 #include <iostream>
 #include <stdio.h>
 #include <utility.h>
+#include "graycodedecoder.h"
+
 using namespace cv;
 using namespace std;
 using namespace Utility;
@@ -29,6 +31,7 @@ static void help()
          "./example_structured_light_cap_pattern <path> <proj_width> <proj_height> \n"
          << endl;
 }
+
 
 int main( int argc, char** argv )
 {
@@ -46,12 +49,14 @@ int main( int argc, char** argv )
       help();
       return -1;
     }
+
     // Set up GraycodePattern with params
     Ptr<structured_light::GrayCodePattern> graycode = structured_light::GrayCodePattern::create( params );
     // Storage for pattern
     vector<Mat> pattern;
     graycode->generate( pattern );
-    cout << pattern.size() << " pattern images + 2 images for shadows mask computation to acquire with both cameras"
+    size_t numberOfPatternImages = pattern.size();
+    cout << numberOfPatternImages << " pattern images + 2 images for shadows mask computation to acquire with both cameras"
            << endl;
     // Generate the all-white and all-black images needed for shadows mask computation
     Mat white;
@@ -61,12 +66,18 @@ int main( int argc, char** argv )
     pattern.push_back( black );
 
     namedWindow( "cam1", WINDOW_NORMAL );
-    resizeWindow( "cam1", 640, 480 );
+    //resizeWindow( "cam1", 640, 480 );
+    resizeWindow("cam1", params.width, params.height);
     // Setting pattern window on second monitor (the projector's one)
     namedWindow( "Pattern Window", WINDOW_NORMAL );
     resizeWindow( "Pattern Window", params.width, params.height );
     moveWindow( "Pattern Window", params.width + 316, -20 );
     setWindowProperty( "Pattern Window", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN );
+
+    //for captured images
+    vector<Mat>  captured_patterns;
+    captured_patterns.resize( numberOfPatternImages );
+    Mat blackImage, whiteImage;
 
     // Open kinect rgb cam, using openni
     VideoCapture capture( CV_CAP_OPENNI );
@@ -112,6 +123,15 @@ int main( int argc, char** argv )
           if( save1 )
           {
             cout << "pattern cam1 images number " << i + 1 << " saved" << endl << endl;
+            if(i < pattern.size() - 2) {
+                captured_patterns.push_back(frame1);
+            }
+            else if(i == pattern.size() -2){
+                whiteImage = frame1.clone();
+            }
+            else if(i == pattern.size() -1){
+                blackImage = frame1.clone();
+            }
             i++;
           }
           else
@@ -130,78 +150,22 @@ int main( int argc, char** argv )
         cout << "No frame data, waiting for new frame" << endl;
       }
     }
+    //end while loop for capturing patterns
+
+    //decode graycode
+
+    //loading Kinect RGB Instrinsic and Distortion coeffs: To Do
+    Mat map1x, map1y;
+    //initUndistortRectifyMap( cam1intrinsics, cam1distCoeffs, R1, P1, imagesSize, CV_32FC1, map1x, map1y );
+    //rectify all captured patterns before decoding
+    for(int i=0; i< captured_patterns.size(); i++){
+        remap( captured_patterns[i], captured_patterns[i], map1x, map1y, INTER_NEAREST, BORDER_CONSTANT, Scalar() );
+    }
+    remap( blackImage, blackImage, map1x, map1y, INTER_NEAREST, BORDER_CONSTANT, Scalar() );
+    remap( whiteImage, whiteImage, map1x, map1y, INTER_NEAREST, BORDER_CONSTANT, Scalar() );
+    GrayCodeDecoder decoder(params.width, params.height);
+    decoder.decode(captured_patterns, blackImage, whiteImage);
     // the camera will be deinitialized automatically in VideoCapture destructor
     return 0;
 
 }
-
-/*
-void project(Mat img)
-{
-    QList<QScreen*> screens = qApp->screens();
-    if(screens.length() >1)
-    {
-        QRect screenres = QApplication::desktop()->screenGeometry(1);//screenNumber
-
-        QPixmap pixmap = cvMatToQPixmap(img);
-        int w = screenres.width();
-        int h = screenres.height();
-
-        if(pixmap.width() != w || pixmap.height() != h){
-            qDebug() << "Input Graycode has different resolution than 1024x720\n" ;
-            //exit(1);
-        }
-
-        MyQWidget *secondDisplay = new MyQWidget();
-        secondDisplay->setPixmap(&pixmap);
-        secondDisplay->move(QPoint(screenres.x(), screenres.y()));
-        secondDisplay->resize(screenres.width(), screenres.height());
-        secondDisplay->showFullScreen();
-        cv::waitKey();
-    }
-    else {
-        qDebug() << "Second display is not active\n" ;
-        exit(1);
-    }
-}
-*/
-
-/*
-using namespace cv;
-using namespace std;
-
-
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
-    //qDebug() << QImageReader::supportedImageFormats();
-    QList<QScreen*> screens = qApp->screens();
-    if(screens.length() >1)
-    {
-        QRect screenres = QApplication::desktop()->screenGeometry(1);//screenNumber
-
-        QPixmap* pixmap = new QPixmap("/home/duy/pico-projector/graycode.png");
-        int w = screenres.width();
-        int h = screenres.height();
-
-        if(pixmap->width() != w || pixmap->height() != h){
-            qDebug() << "Input Graycode has different resolution than 1024x720\n" ;
-            //exit(1);
-        }
-
-        MyQWidget *secondDisplay = new MyQWidget();
-        secondDisplay->setPixmap(pixmap);
-        secondDisplay->move(QPoint(screenres.x(), screenres.y()));
-        secondDisplay->resize(screenres.width(), screenres.height());
-        secondDisplay->showFullScreen();
-
-    }
-    else {
-        qDebug() << "Second display is not active\n" ;
-        exit(1);
-    }
-    return a.exec();
-
-}
-
-*/

@@ -14,11 +14,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
     myqwidget.cpp \
-    utility.cpp
+    utility.cpp \
+    graycodedecoder.cpp
 
 HEADERS  += \
     myqwidget.h \
-    utility.h
+    utility.h \
+    graycodedecoder.h
 
 INCLUDEPATH += /usr/local/include/opencv2
 INCLUDEPATH += /usr/local/include/opencv
