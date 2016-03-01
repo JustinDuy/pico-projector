@@ -49,6 +49,30 @@ int main( int argc, char** argv )
       help();
       return -1;
     }
+    //load Kinect calibration file
+    FileStorage fs( "/home/duy/pico-projector/rgb_A00363813595051A.yaml", FileStorage::READ );
+    if( !fs.isOpened() )
+    {
+      cout << "Failed to open Calibration Data File." << endl;
+      help();
+      return -1;
+    }
+    // Loading calibration parameters
+    Mat cam1intrinsics, cam1distCoeffs;
+
+    fs["camera_matrix"] >> cam1intrinsics;
+
+    fs["distortion_coefficients"] >> cam1distCoeffs;
+
+    cout << "cam1intrinsics" << endl << cam1intrinsics << endl;
+    cout << "cam1distCoeffs" << endl << cam1distCoeffs << endl;
+
+    if((!cam1intrinsics.data) || (!cam1distCoeffs.data) )
+    {
+      cout << "Failed to load cameras calibration parameters" << endl;
+      help();
+      return -1;
+    }
 
     // Set up GraycodePattern with params
     Ptr<structured_light::GrayCodePattern> graycode = structured_light::GrayCodePattern::create( params );
@@ -111,7 +135,7 @@ int main( int argc, char** argv )
         // Resizing images to avoid issues for high resolution images, visualizing them as grayscale
         resize( frame1, tmp, Size( 640, 480 ) );
         cvtColor( tmp, tmp, COLOR_RGB2GRAY );
-        imshow( "cam1", tmp );
+        //imshow( "cam1", tmp );
         bool save1 = false;
         int key = waitKey( 0 );
         // Pressing enter, it saves the output
@@ -155,8 +179,12 @@ int main( int argc, char** argv )
     //decode graycode
 
     //loading Kinect RGB Instrinsic and Distortion coeffs: To Do
-    Mat map1x, map1y;
-    //initUndistortRectifyMap( cam1intrinsics, cam1distCoeffs, R1, P1, imagesSize, CV_32FC1, map1x, map1y );
+    Size imagesSize = blackImage.size();
+    Mat R1, map1x, map1y;
+
+    initUndistortRectifyMap( cam1intrinsics, cam1distCoeffs, R1, cam1intrinsics, imagesSize, CV_32FC1, map1x, map1y );
+    //R1 empty -> default identity transformation
+
     //rectify all captured patterns before decoding
     for(int i=0; i< captured_patterns.size(); i++){
         remap( captured_patterns[i], captured_patterns[i], map1x, map1y, INTER_NEAREST, BORDER_CONSTANT, Scalar() );
@@ -166,6 +194,8 @@ int main( int argc, char** argv )
     GrayCodeDecoder decoder(params.width, params.height);
     decoder.decode(captured_patterns, blackImage, whiteImage);
     // the camera will be deinitialized automatically in VideoCapture destructor
+
     return 0;
 
 }
+
