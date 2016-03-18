@@ -1,8 +1,6 @@
 #include <QApplication>
 #include <QDebug>
 #include <stdio.h>
-
-#include "myqwidget.h"
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QWidget>
@@ -11,19 +9,15 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/structured_light.hpp>
+
 #include <iostream>
 #include <stdio.h>
 #include <utility.h>
 #include "graycodedecoder.h"
-
 using namespace cv;
 using namespace std;
 using namespace Utility;
 void project(Mat img);
-static const char* keys =
-{ "{@path | | Path of the folder where the captured pattern images will be save }"
-     "{@proj_width      | | Projector width            }"
-     "{@proj_height     | | Projector height           }" };
 static void help()
 {
     cout << "\nThis example shows how to use the \"Structured Light module\" to acquire a graycode pattern"
@@ -31,20 +25,23 @@ static void help()
          "./example_structured_light_cap_pattern <path> <proj_width> <proj_height> \n"
          << endl;
 }
-
-
+void kronnecker(const Mat& a, const Mat& b, Mat& product);
+void estimate_Camera_Projector_Pose(vector<Mat> pattern, int pro_width, int pro_height, int numberOfPatternImages, VideoCapture capture,
+                                    const Mat& Kc, const Mat& camdistCoeffs, const Mat& Kp, Mat& Ra, Mat& ua);
+void formLinSys(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat& tb, Mat& M, int poseNum );
+String captured_path = "/home/duy/pico-projector/captured/";
 int main( int argc, char** argv )
 {
     QApplication a(argc, argv);
     structured_light::GrayCodePattern::Params params;
     //CommandLineParser parser( argc, argv, keys );
-    //String path = parser.get<String>( 0 );
+    //String captured_path = parser.get<String>( 0 );
     //params.width = parser.get<int>( 1 );
     //params.height = parser.get<int>( 2 );
-    String path = "/home/duy/pico-projector/captured/";
+
     params.width = 1280;
     params.height = 720;
-    if( path.empty() || params.width < 1 || params.height < 1 )
+    if( captured_path.empty() || params.width < 1 || params.height < 1 )
     {
       help();
       return -1;
@@ -53,23 +50,29 @@ int main( int argc, char** argv )
     FileStorage fs( "/home/duy/pico-projector/rgb_A00363813595051A.yaml", FileStorage::READ );
     if( !fs.isOpened() )
     {
-      cout << "Failed to open Calibration Data File." << endl;
+      cout << "Failed to open Camera Calibration Data File." << endl;
       help();
       return -1;
     }
+    FileStorage fs2( "/home/duy/pico-projector/calibration.yml", FileStorage::READ);
+    if( !fs2.isOpened()){
+        cout << "Failed to open Projector Calibration Data File." << endl;
+    }
+
     // Loading calibration parameters
     Mat cam1intrinsics, cam1distCoeffs;
+    Mat prointrinsics;
 
     fs["camera_matrix"] >> cam1intrinsics;
-
     fs["distortion_coefficients"] >> cam1distCoeffs;
-
     cout << "cam1intrinsics" << endl << cam1intrinsics << endl;
     cout << "cam1distCoeffs" << endl << cam1distCoeffs << endl;
 
-    if((!cam1intrinsics.data) || (!cam1distCoeffs.data) )
+    fs2["proj_K"] >> prointrinsics;
+    cout << "prointrinsics" << endl << prointrinsics << endl;
+    if((!cam1intrinsics.data) || (!cam1distCoeffs.data) || (!prointrinsics.data))
     {
-      cout << "Failed to load cameras calibration parameters" << endl;
+      cout << "Failed to load camera/projector calibration parameters" << endl;
       help();
       return -1;
     }
@@ -86,22 +89,21 @@ int main( int argc, char** argv )
     Mat white;
     Mat black;
     graycode->getImagesForShadowMasks( black, white );
-    pattern.push_back( white );
-    pattern.push_back( black );
+    pattern.insert (  pattern.begin() , black );
+    pattern.insert (  pattern.begin() , white );
+    //pattern.push_back( white );
+    //pattern.push_back( black );
+
 
     namedWindow( "cam1", WINDOW_NORMAL );
-    //resizeWindow( "cam1", 640, 480 );
-    resizeWindow("cam1", params.width, params.height);
+    resizeWindow( "cam1", 640, 480 );
+    //resizeWindow("cam1", params.width, params.height);
+
     // Setting pattern window on second monitor (the projector's one)
     namedWindow( "Pattern Window", WINDOW_NORMAL );
     resizeWindow( "Pattern Window", params.width, params.height );
     moveWindow( "Pattern Window", params.width + 316, -20 );
     setWindowProperty( "Pattern Window", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN );
-
-    //for captured images
-    vector<Mat>  captured_patterns;
-    captured_patterns.resize( numberOfPatternImages );
-    Mat blackImage, whiteImage;
 
     // Open kinect rgb cam, using openni
     VideoCapture capture( CV_CAP_OPENNI );
@@ -112,11 +114,110 @@ int main( int argc, char** argv )
       help();
       return -1;
     }
-    //turn off autofocus?
-    //capture.set( CAP_PROP_SETTINGS, 1 );
 
-    int i = 0;
-    while( i < (int) pattern.size() )
+    int numOfPose = 6; //as least 3 poses are neccessary
+    /**********************************************************************************
+     * linear system : to be updated every pose
+     *
+     * M x [vec(Rx);vec(Rz);tx;tz;[lamda1,lamda2,...,lamda_i]^T] = 0
+     *
+     * M dim = (12 * #pose) x (24 + #pose)
+     *
+     **********************************************************************************/
+    Mat M;
+    for(int pose = 0; pose < numOfPose; pose++){
+        //estimate Ra, ua: using graycode
+        Mat Ra, ua;
+        estimate_Camera_Projector_Pose(pattern, params.width, params.height, numberOfPatternImages,capture,
+                                       cam1intrinsics, cam1distCoeffs, prointrinsics, Ra,ua);
+        //read in Robot Hand-Base transformation : Rb,tb
+        Mat Rb, tb;
+        //update linear system to solve
+        formLinSys(Ra,ua,Rb,tb,M, pose+1);
+    }
+    // the camera will be deinitialized automatically in VideoCapture destructor
+    return 0;
+}
+void formLinSys(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat& tb, Mat& M, int poseNum ){
+    int curRows = M.rows;
+    int curCols = M.cols;
+    Mat ret = Mat::zeros(12*poseNum, 24+poseNum, CV_64F);
+    if(poseNum > 1){
+        //check if previous system size qualified
+        if(curRows != 12*poseNum || curCols != 24+poseNum)
+            return ;
+        //copy previous linear system
+        M.copyTo(ret(Rect(0, 0, M.cols, M.rows)));
+
+        //add 12x24 matrix
+        int offset_y = 12 * (poseNum -1) ;
+        Mat tmp ;//= Mat::zeros(9,9, CV_64F);
+        kronnecker(Ra, Rb, tmp);
+        tmp.copyTo(ret(Rect(0,offset_y,9,9)));
+        Mat I9 = Mat::eye(9,9,CV_64F);
+        Mat I3 = Mat::eye(3,3,CV_64F);
+        I9.copyTo(ret(Rect(9,offset_y,9,9)));
+        kronnecker(I3,tb.t(), tmp);
+        tmp.copyTo(ret(Rect(9,9 + offset_y,9,3)));
+        Mat neg_Ra = (-1) * Ra ;
+        neg_Ra.copyTo(ret(Rect(18,9 + offset_y,3,3)));
+        I3.copyTo(ret(Rect(21,9 + offset_y,3,3)));
+        ua.copyTo(ret(Rect(24,9 + offset_y,1,3)));
+
+        //add last col
+        int y = 12*(poseNum -1) + 9;
+        int x =  24 + (poseNum -1);
+        ua.copyTo(ret(Rect(x,y,1,3)));
+    }
+    else if(poseNum == 1){
+        //M = Mat::zeros(12, 25, CV_64F);
+        Mat tmp ;//= Mat::zeros(9,9, CV_64F);
+        kronnecker(Ra, Rb, tmp);
+        tmp.copyTo(ret(Rect(0,0,9,9)));
+        Mat I9 = Mat::eye(9,9,CV_64F);
+        Mat I3 = Mat::eye(3,3,CV_64F);
+        I9.copyTo(ret(Rect(9,0,9,9)));
+        kronnecker(I3,tb.t(), tmp);
+        tmp.copyTo(ret(Rect(9,9,9,3)));
+        Mat neg_Ra = (-1) * Ra ;
+        neg_Ra.copyTo(ret(Rect(18,9,3,3)));
+        I3.copyTo(ret(Rect(21,9,3,3)));
+        ua.copyTo(ret(Rect(24,9,1,3)));
+    }
+
+    M = ret;
+    cout << M << endl;
+}
+void kronnecker(const Mat& a, const Mat& b, Mat& product){
+    int m = a.rows;
+    int n = a.cols;
+
+    int p = b.rows;
+    int q = b.cols;
+    product = Mat::zeros(m*p, n*q, CV_64F);
+    for(int i = 0; i < m; i++)
+    {
+        for(int j = 0; j < n; i++)
+        {
+            //a (i,j)
+            for(int r = 0; r < p ; r++)
+            {
+                for(int c = 0; c < q; c++)
+                {
+                    product.at<double>(i*p + r,j*q + c) = a.at<double>(i,j) * b.at<double> (r,c);
+                }
+            }
+        }
+    }
+}
+void estimate_Camera_Projector_Pose(vector<Mat> pattern, int pro_width, int pro_height, int numberOfPatternImages, VideoCapture capture,const Mat& Kc, const Mat& camdistCoeffs, const Mat& Kp, Mat& Ra, Mat& ua){
+    //for captured images
+    vector<Mat>  captured_patterns;
+    captured_patterns.resize( numberOfPatternImages );
+    Mat blackImage, whiteImage;
+
+    int i =0;
+    while( i < numberOfPatternImages )
     {
       cout << "Waiting to save image number " << i + 1 << endl << "Press any key to acquire the photo" << endl;
       imshow( "Pattern Window", pattern[i] );
@@ -124,6 +225,7 @@ int main( int argc, char** argv )
       capture.grab();
       //capture.retrieve( depthMap, CV_CAP_OPENNI_DEPTH_MAP );
       capture.retrieve( frame1, CV_CAP_OPENNI_BGR_IMAGE );
+
       if( frame1.data  )
       {
         Mat tmp;
@@ -135,15 +237,17 @@ int main( int argc, char** argv )
         // Resizing images to avoid issues for high resolution images, visualizing them as grayscale
         resize( frame1, tmp, Size( 640, 480 ) );
         cvtColor( tmp, tmp, COLOR_RGB2GRAY );
-        //imshow( "cam1", tmp );
+        imshow( "cam1", tmp );
         bool save1 = false;
+
+
         int key = waitKey( 0 );
         // Pressing enter, it saves the output
         if( key == 10 )
         {
           ostringstream name;
           name << i + 1;
-          save1 = imwrite( path + "pattern_cam1_im" + name.str() + ".png", frame1 );
+          save1 = imwrite( captured_path + "pattern_cam1_im" + name.str() + ".png", frame1 );
           if( save1 )
           {
             cout << "pattern cam1 images number " << i + 1 << " saved" << endl << endl;
@@ -182,7 +286,7 @@ int main( int argc, char** argv )
     Size imagesSize = blackImage.size();
     Mat R1, map1x, map1y;
 
-    initUndistortRectifyMap( cam1intrinsics, cam1distCoeffs, R1, cam1intrinsics, imagesSize, CV_32FC1, map1x, map1y );
+    initUndistortRectifyMap( Kc, camdistCoeffs, R1, Kc, imagesSize, CV_32FC1, map1x, map1y );
     //R1 empty -> default identity transformation
 
     //rectify all captured patterns before decoding
@@ -191,11 +295,7 @@ int main( int argc, char** argv )
     }
     remap( blackImage, blackImage, map1x, map1y, INTER_NEAREST, BORDER_CONSTANT, Scalar() );
     remap( whiteImage, whiteImage, map1x, map1y, INTER_NEAREST, BORDER_CONSTANT, Scalar() );
-    GrayCodeDecoder decoder(params.width, params.height);
-    decoder.decode(captured_patterns, blackImage, whiteImage);
-    // the camera will be deinitialized automatically in VideoCapture destructor
-
-    return 0;
+    GrayCodeDecoder decoder(pro_width, pro_height);
+    decoder.decode(captured_patterns, blackImage, whiteImage, Kp, Kc, Ra, ua);
 
 }
-
