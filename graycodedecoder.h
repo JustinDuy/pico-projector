@@ -14,14 +14,13 @@ public:
     GrayCodeDecoder(int w, int h);
 
     //decode graycode
-    bool decode( vector<Mat> patternImages,const Mat blackImage, const Mat whiteImage);// output : Transformation matrix ? to be defined
-
+    void decode( vector<Mat> patternImages, const Mat& blackImage, const Mat& whiteImage,
+                 const Mat& Kp, const Mat& Kc, Mat& R, Mat& u);
     // Sets the value for black threshold
     void setBlackThreshold( size_t val );
 
     // Sets the value for set the value for white threshold
     void setWhiteThreshold( size_t val );
-
 
 private:
     // Parameters

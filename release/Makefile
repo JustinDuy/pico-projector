@@ -15,7 +15,7 @@ CXX           = g++
 DEFINES       = -DQT_QML_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I../../pico-projector -I. -I/usr/local/include/opencv2 -I/usr/local/include/opencv -I../../Qt/5.5/gcc_64/include -I../../Qt/5.5/gcc_64/include/QtWidgets -I../../Qt/5.5/gcc_64/include/QtGui -I../../Qt/5.5/gcc_64/include/QtCore -I. -I../../Qt/5.5/gcc_64/mkspecs/linux-g++
+INCPATH       = -I../../pico-projector -I. -I../../opencv-3/release/include -I../../Qt/5.5/gcc_64/include -I../../Qt/5.5/gcc_64/include/QtWidgets -I../../Qt/5.5/gcc_64/include/QtGui -I../../Qt/5.5/gcc_64/include/QtCore -I. -I../../Qt/5.5/gcc_64/mkspecs/linux-g++
 QMAKE         = /home/duy/Qt/5.5/gcc_64/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -36,7 +36,7 @@ DISTNAME      = pico-projector1.0.0
 DISTDIR = /home/duy/pico-projector/release/.tmp/pico-projector1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-rpath,/home/duy/Qt/5.5/gcc_64 -Wl,-rpath,/home/duy/Qt/5.5/gcc_64/lib
-LIBS          = $(SUBLIBS) `pkg-config opencv --libs` -L/home/duy/Qt/5.5/gcc_64/lib -lQt5Widgets -L/usr/lib64 -lQt5Gui -lQt5Core -lGL -lpthread 
+LIBS          = $(SUBLIBS) -L/home/duy/opencv-3/release/lib -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lopencv_features2d -lopencv_flann -L/home/duy/Qt/5.5/gcc_64/lib -lQt5Widgets -L/usr/lib64 -lQt5Gui -lQt5Core -lGL -lpthread 
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -49,14 +49,11 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = ../main.cpp \
-		../myqwidget.cpp \
 		../utility.cpp \
-		../graycodedecoder.cpp moc_myqwidget.cpp
+		../graycodedecoder.cpp 
 OBJECTS       = main.o \
-		myqwidget.o \
 		utility.o \
-		graycodedecoder.o \
-		moc_myqwidget.o
+		graycodedecoder.o
 DIST          = ../../../Qt/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../Qt/5.5/gcc_64/mkspecs/common/unix.conf \
 		../../../Qt/5.5/gcc_64/mkspecs/common/linux.conf \
@@ -192,10 +189,8 @@ DIST          = ../../../Qt/5.5/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../Qt/5.5/gcc_64/mkspecs/features/exceptions.prf \
 		../../../Qt/5.5/gcc_64/mkspecs/features/yacc.prf \
 		../../../Qt/5.5/gcc_64/mkspecs/features/lex.prf \
-		../../pico-projector.pro ../myqwidget.h \
-		../utility.h \
+		../../pico-projector.pro ../utility.h \
 		../graycodedecoder.h ../main.cpp \
-		../myqwidget.cpp \
 		../utility.cpp \
 		../graycodedecoder.cpp
 QMAKE_TARGET  = pico-projector
@@ -521,8 +516,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents ../myqwidget.h ../utility.h ../graycodedecoder.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../main.cpp ../myqwidget.cpp ../utility.cpp ../graycodedecoder.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../utility.h ../graycodedecoder.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../main.cpp ../utility.cpp ../graycodedecoder.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -545,114 +540,8 @@ check: first
 
 compiler_rcc_make_all:
 compiler_rcc_clean:
-compiler_moc_header_make_all: moc_myqwidget.cpp
+compiler_moc_header_make_all:
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_myqwidget.cpp
-moc_myqwidget.cpp: ../../Qt/5.5/gcc_64/include/QtWidgets/QWidget \
-		../../Qt/5.5/gcc_64/include/QtWidgets/qwidget.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qwindowdefs.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qglobal.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qconfig.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qfeatures.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qsystemdetection.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qprocessordetection.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qcompilerdetection.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qtypeinfo.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qtypetraits.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qsysinfo.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qlogging.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qflags.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qbasicatomic.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_bootstrap.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qgenericatomic.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_cxx11.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_gcc.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_msvc.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_armv7.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_armv6.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_armv5.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_ia64.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_mips.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_x86.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_unix.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qglobalstatic.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qmutex.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qnumeric.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qobjectdefs.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qnamespace.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qobjectdefs_impl.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qwindowdefs_win.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qobject.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qstring.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qchar.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qbytearray.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qrefcount.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qarraydata.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qstringbuilder.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qlist.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qalgorithms.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qiterator.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qbytearraylist.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qstringlist.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qregexp.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qstringmatcher.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qcoreevent.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qscopedpointer.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qmetatype.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qvarlengtharray.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qcontainerfwd.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qisenum.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qobject_impl.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qmargins.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qpaintdevice.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qrect.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qsize.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qpoint.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qpalette.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qcolor.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qrgb.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qbrush.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qpair.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qvector.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qmatrix.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qpolygon.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qregion.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qdatastream.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qiodevice.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qline.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qtransform.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qpainterpath.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qimage.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qpixelformat.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qpixmap.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qsharedpointer.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qshareddata.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qhash.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qsharedpointer_impl.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qfont.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qfontmetrics.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qfontinfo.h \
-		../../Qt/5.5/gcc_64/include/QtWidgets/qsizepolicy.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qcursor.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qkeysequence.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qevent.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qvariant.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qmap.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qdebug.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qtextstream.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qlocale.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qset.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qcontiguouscache.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qurl.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qurlquery.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qfile.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qfiledevice.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qvector2d.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qtouchdevice.h \
-		../myqwidget.h
-	/home/duy/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/home/duy/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/duy/pico-projector -I/usr/local/include/opencv2 -I/usr/local/include/opencv -I/home/duy/Qt/5.5/gcc_64/include -I/home/duy/Qt/5.5/gcc_64/include/QtWidgets -I/home/duy/Qt/5.5/gcc_64/include/QtGui -I/home/duy/Qt/5.5/gcc_64/include/QtCore -I. ../myqwidget.h -o moc_myqwidget.cpp
-
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
 compiler_uic_make_all:
@@ -663,7 +552,7 @@ compiler_yacc_impl_make_all:
 compiler_yacc_impl_clean:
 compiler_lex_make_all:
 compiler_lex_clean:
-compiler_clean: compiler_moc_header_clean 
+compiler_clean: 
 
 ####### Compile
 
@@ -776,9 +665,8 @@ main.o: ../main.cpp ../../Qt/5.5/gcc_64/include/QtWidgets/QApplication \
 		../../Qt/5.5/gcc_64/include/QtGui/qguiapplication.h \
 		../../Qt/5.5/gcc_64/include/QtGui/qinputmethod.h \
 		../../Qt/5.5/gcc_64/include/QtCore/QDebug \
-		../myqwidget.h \
-		../../Qt/5.5/gcc_64/include/QtWidgets/QWidget \
 		../../Qt/5.5/gcc_64/include/QtWidgets/QDesktopWidget \
+		../../Qt/5.5/gcc_64/include/QtWidgets/QWidget \
 		../../Qt/5.5/gcc_64/include/QtGui/QImageReader \
 		../../Qt/5.5/gcc_64/include/QtGui/qimagereader.h \
 		../../Qt/5.5/gcc_64/include/QtGui/qimageiohandler.h \
@@ -787,124 +675,47 @@ main.o: ../main.cpp ../../Qt/5.5/gcc_64/include/QtWidgets/QApplication \
 		../../Qt/5.5/gcc_64/include/QtCore/qjsonobject.h \
 		../../Qt/5.5/gcc_64/include/QtCore/qjsonvalue.h \
 		../../Qt/5.5/gcc_64/include/QtCore/qfactoryinterface.h \
+		../../opencv-3/release/include/opencv2/imgproc.hpp \
+		../../opencv-3/release/include/opencv2/core.hpp \
+		../../opencv-3/release/include/opencv2/core/cvdef.h \
+		../../opencv-3/release/include/opencv2/core/hal/interface.h \
+		../../opencv-3/release/include/opencv2/core/version.hpp \
+		../../opencv-3/release/include/opencv2/core/base.hpp \
+		../../opencv-3/release/include/opencv2/core/cvstd.hpp \
+		../../opencv-3/release/include/opencv2/core/ptr.inl.hpp \
+		../../opencv-3/release/include/opencv2/core/neon_utils.hpp \
+		../../opencv-3/release/include/opencv2/core/traits.hpp \
+		../../opencv-3/release/include/opencv2/core/matx.hpp \
+		../../opencv-3/release/include/opencv2/core/saturate.hpp \
+		../../opencv-3/release/include/opencv2/core/fast_math.hpp \
+		../../opencv-3/release/include/opencv2/core/types.hpp \
+		../../opencv-3/release/include/opencv2/core/mat.hpp \
+		../../opencv-3/release/include/opencv2/core/bufferpool.hpp \
+		../../opencv-3/release/include/opencv2/core/mat.inl.hpp \
+		../../opencv-3/release/include/opencv2/core/persistence.hpp \
+		../../opencv-3/release/include/opencv2/core/operations.hpp \
+		../../opencv-3/release/include/opencv2/core/cvstd.inl.hpp \
+		../../opencv-3/release/include/opencv2/core/utility.hpp \
+		../../opencv-3/release/include/opencv2/core/core_c.h \
+		../../opencv-3/release/include/opencv2/core/types_c.h \
+		../../opencv-3/release/include/opencv2/core/optim.hpp \
+		../../opencv-3/release/include/opencv2/imgproc/imgproc_c.h \
+		../../opencv-3/release/include/opencv2/imgproc/types_c.h \
+		../../opencv-3/release/include/opencv2/highgui.hpp \
+		../../opencv-3/release/include/opencv2/imgcodecs.hpp \
+		../../opencv-3/release/include/opencv2/videoio.hpp \
+		../../opencv-3/release/include/opencv2/highgui/highgui_c.h \
+		../../opencv-3/release/include/opencv2/imgcodecs/imgcodecs_c.h \
+		../../opencv-3/release/include/opencv2/videoio/videoio_c.h \
+		../../opencv-3/release/include/opencv2/structured_light.hpp \
+		../../opencv-3/release/include/opencv2/structured_light/structured_light.hpp \
+		../../opencv-3/release/include/opencv2/structured_light/graycodepattern.hpp \
 		../utility.h \
 		../../Qt/5.5/gcc_64/include/QtGui/QImage \
 		../../Qt/5.5/gcc_64/include/QtGui/QPixmap \
+		../../opencv-3/release/include/opencv2/imgproc/imgproc.hpp \
 		../graycodedecoder.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../main.cpp
-
-myqwidget.o: ../myqwidget.cpp ../myqwidget.h \
-		../../Qt/5.5/gcc_64/include/QtWidgets/QWidget \
-		../../Qt/5.5/gcc_64/include/QtWidgets/qwidget.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qwindowdefs.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qglobal.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qconfig.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qfeatures.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qsystemdetection.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qprocessordetection.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qcompilerdetection.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qtypeinfo.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qtypetraits.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qsysinfo.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qlogging.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qflags.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qbasicatomic.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_bootstrap.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qgenericatomic.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_cxx11.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_gcc.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_msvc.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_armv7.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_armv6.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_armv5.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_ia64.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_mips.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_x86.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qatomic_unix.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qglobalstatic.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qmutex.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qnumeric.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qobjectdefs.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qnamespace.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qobjectdefs_impl.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qwindowdefs_win.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qobject.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qstring.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qchar.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qbytearray.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qrefcount.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qarraydata.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qstringbuilder.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qlist.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qalgorithms.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qiterator.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qbytearraylist.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qstringlist.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qregexp.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qstringmatcher.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qcoreevent.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qscopedpointer.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qmetatype.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qvarlengtharray.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qcontainerfwd.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qisenum.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qobject_impl.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qmargins.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qpaintdevice.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qrect.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qsize.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qpoint.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qpalette.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qcolor.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qrgb.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qbrush.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qpair.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qvector.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qmatrix.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qpolygon.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qregion.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qdatastream.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qiodevice.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qline.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qtransform.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qpainterpath.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qimage.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qpixelformat.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qpixmap.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qsharedpointer.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qshareddata.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qhash.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qsharedpointer_impl.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qfont.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qfontmetrics.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qfontinfo.h \
-		../../Qt/5.5/gcc_64/include/QtWidgets/qsizepolicy.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qcursor.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qkeysequence.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qevent.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qvariant.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qmap.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qdebug.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qtextstream.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qlocale.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qset.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qcontiguouscache.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qurl.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qurlquery.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qfile.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qfiledevice.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qvector2d.h \
-		../../Qt/5.5/gcc_64/include/QtGui/qtouchdevice.h \
-		../../Qt/5.5/gcc_64/include/QtWidgets/QHBoxLayout \
-		../../Qt/5.5/gcc_64/include/QtWidgets/qboxlayout.h \
-		../../Qt/5.5/gcc_64/include/QtWidgets/qlayout.h \
-		../../Qt/5.5/gcc_64/include/QtWidgets/qlayoutitem.h \
-		../../Qt/5.5/gcc_64/include/QtWidgets/qgridlayout.h \
-		../../Qt/5.5/gcc_64/include/QtWidgets/QLabel \
-		../../Qt/5.5/gcc_64/include/QtWidgets/qlabel.h \
-		../../Qt/5.5/gcc_64/include/QtWidgets/qframe.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o myqwidget.o ../myqwidget.cpp
 
 utility.o: ../utility.cpp ../utility.h \
 		../../Qt/5.5/gcc_64/include/QtGui/QImage \
@@ -994,14 +805,80 @@ utility.o: ../utility.cpp ../utility.h \
 		../../Qt/5.5/gcc_64/include/QtCore/qlocale.h \
 		../../Qt/5.5/gcc_64/include/QtCore/qvariant.h \
 		../../Qt/5.5/gcc_64/include/QtCore/qset.h \
-		../../Qt/5.5/gcc_64/include/QtCore/qcontiguouscache.h
+		../../Qt/5.5/gcc_64/include/QtCore/qcontiguouscache.h \
+		../../opencv-3/release/include/opencv2/imgproc/imgproc.hpp \
+		../../opencv-3/release/include/opencv2/imgproc.hpp \
+		../../opencv-3/release/include/opencv2/core.hpp \
+		../../opencv-3/release/include/opencv2/core/cvdef.h \
+		../../opencv-3/release/include/opencv2/core/hal/interface.h \
+		../../opencv-3/release/include/opencv2/core/version.hpp \
+		../../opencv-3/release/include/opencv2/core/base.hpp \
+		../../opencv-3/release/include/opencv2/core/cvstd.hpp \
+		../../opencv-3/release/include/opencv2/core/ptr.inl.hpp \
+		../../opencv-3/release/include/opencv2/core/neon_utils.hpp \
+		../../opencv-3/release/include/opencv2/core/traits.hpp \
+		../../opencv-3/release/include/opencv2/core/matx.hpp \
+		../../opencv-3/release/include/opencv2/core/saturate.hpp \
+		../../opencv-3/release/include/opencv2/core/fast_math.hpp \
+		../../opencv-3/release/include/opencv2/core/types.hpp \
+		../../opencv-3/release/include/opencv2/core/mat.hpp \
+		../../opencv-3/release/include/opencv2/core/bufferpool.hpp \
+		../../opencv-3/release/include/opencv2/core/mat.inl.hpp \
+		../../opencv-3/release/include/opencv2/core/persistence.hpp \
+		../../opencv-3/release/include/opencv2/core/operations.hpp \
+		../../opencv-3/release/include/opencv2/core/cvstd.inl.hpp \
+		../../opencv-3/release/include/opencv2/core/utility.hpp \
+		../../opencv-3/release/include/opencv2/core/core_c.h \
+		../../opencv-3/release/include/opencv2/core/types_c.h \
+		../../opencv-3/release/include/opencv2/core/optim.hpp \
+		../../opencv-3/release/include/opencv2/imgproc/imgproc_c.h \
+		../../opencv-3/release/include/opencv2/imgproc/types_c.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o utility.o ../utility.cpp
 
-graycodedecoder.o: ../graycodedecoder.cpp ../graycodedecoder.h
+graycodedecoder.o: ../graycodedecoder.cpp ../graycodedecoder.h \
+		../../opencv-3/release/include/opencv2/imgproc.hpp \
+		../../opencv-3/release/include/opencv2/core.hpp \
+		../../opencv-3/release/include/opencv2/core/cvdef.h \
+		../../opencv-3/release/include/opencv2/core/hal/interface.h \
+		../../opencv-3/release/include/opencv2/core/version.hpp \
+		../../opencv-3/release/include/opencv2/core/base.hpp \
+		../../opencv-3/release/include/opencv2/core/cvstd.hpp \
+		../../opencv-3/release/include/opencv2/core/ptr.inl.hpp \
+		../../opencv-3/release/include/opencv2/core/neon_utils.hpp \
+		../../opencv-3/release/include/opencv2/core/traits.hpp \
+		../../opencv-3/release/include/opencv2/core/matx.hpp \
+		../../opencv-3/release/include/opencv2/core/saturate.hpp \
+		../../opencv-3/release/include/opencv2/core/fast_math.hpp \
+		../../opencv-3/release/include/opencv2/core/types.hpp \
+		../../opencv-3/release/include/opencv2/core/mat.hpp \
+		../../opencv-3/release/include/opencv2/core/bufferpool.hpp \
+		../../opencv-3/release/include/opencv2/core/mat.inl.hpp \
+		../../opencv-3/release/include/opencv2/core/persistence.hpp \
+		../../opencv-3/release/include/opencv2/core/operations.hpp \
+		../../opencv-3/release/include/opencv2/core/cvstd.inl.hpp \
+		../../opencv-3/release/include/opencv2/core/utility.hpp \
+		../../opencv-3/release/include/opencv2/core/core_c.h \
+		../../opencv-3/release/include/opencv2/core/types_c.h \
+		../../opencv-3/release/include/opencv2/core/optim.hpp \
+		../../opencv-3/release/include/opencv2/imgproc/imgproc_c.h \
+		../../opencv-3/release/include/opencv2/imgproc/types_c.h \
+		../../opencv-3/release/include/opencv2/highgui.hpp \
+		../../opencv-3/release/include/opencv2/imgcodecs.hpp \
+		../../opencv-3/release/include/opencv2/videoio.hpp \
+		../../opencv-3/release/include/opencv2/highgui/highgui_c.h \
+		../../opencv-3/release/include/opencv2/imgcodecs/imgcodecs_c.h \
+		../../opencv-3/release/include/opencv2/videoio/videoio_c.h \
+		../../opencv-3/release/include/opencv2/structured_light.hpp \
+		../../opencv-3/release/include/opencv2/structured_light/structured_light.hpp \
+		../../opencv-3/release/include/opencv2/structured_light/graycodepattern.hpp \
+		../../opencv-3/release/include/opencv2/calib3d.hpp \
+		../../opencv-3/release/include/opencv2/features2d.hpp \
+		../../opencv-3/release/include/opencv2/flann/miniflann.hpp \
+		../../opencv-3/release/include/opencv2/flann/defines.h \
+		../../opencv-3/release/include/opencv2/flann/config.h \
+		../../opencv-3/release/include/opencv2/core/affine.hpp \
+		../../opencv-3/release/include/opencv2/calib3d/calib3d_c.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o graycodedecoder.o ../graycodedecoder.cpp
-
-moc_myqwidget.o: moc_myqwidget.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_myqwidget.o moc_myqwidget.cpp
 
 ####### Install
 

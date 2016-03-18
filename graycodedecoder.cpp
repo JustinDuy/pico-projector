@@ -1,4 +1,7 @@
 #include "graycodedecoder.h"
+#include <opencv2/calib3d.hpp>
+#include <iostream>
+#include <stdio.h>
 
 GrayCodeDecoder::GrayCodeDecoder()
 {
@@ -137,7 +140,9 @@ int GrayCodeDecoder::grayToDec( const std::vector<uchar>& gray )
 }
 
 
-bool GrayCodeDecoder::decode( vector<Mat> patternImages, const Mat blackImage, const Mat whiteImage)// output : Transformation matrix ? to be defined
+void GrayCodeDecoder::decode( vector<Mat> patternImages, const Mat& blackImage, const Mat& whiteImage,
+                              const Mat& Kp, const Mat& Kc, Mat& R, Mat& u)
+// output : camera-projector stereo matrix R, u
 {
     // Computing shadows mask
     Mat shadowMask;
@@ -146,9 +151,9 @@ bool GrayCodeDecoder::decode( vector<Mat> patternImages, const Mat blackImage, c
     int cam_height = patternImages[0].rows;
 
     Point projPixel;
-
     // Storage for the pixels of the camera that correspond to the same pixel of the projector
-    std::vector<std::vector<Point> >  camPixels;
+    std::vector<Point> camPixels;
+    std::vector<Point> projPixels;
     camPixels.resize( height * width );
     for( int i = 0; i < cam_width; i++ )
     {
@@ -164,11 +169,49 @@ bool GrayCodeDecoder::decode( vector<Mat> patternImages, const Mat blackImage, c
             {
               continue;
             }
-
-            camPixels[projPixel.x * height + projPixel.y].push_back( Point( i, j ) );
+            else{
+                camPixels.push_back( Point( i, j ) );
+                projPixels.push_back(projPixel);
+            }
           }
         }
     }
+    Mat F = findFundamentalMat(camPixels, projPixels, FM_RANSAC, 3, 0.99);
+    Mat E = Kp.t()*F*Kc;
+    //Perfrom SVD on E
+    SVD decomp = SVD(E);
 
+    //U
+    Mat U = decomp.u;
+
+    //S
+    Mat S(3, 3, CV_64F, Scalar(0));
+    S.at<double>(0, 0) = decomp.w.at<double>(0, 0);
+    S.at<double>(1, 1) = decomp.w.at<double>(0, 1);
+    S.at<double>(2, 2) = decomp.w.at<double>(0, 2);
+
+    //Vt
+    Mat Vt = decomp.vt;
+
+    //W
+    Mat W(3, 3, CV_64F, Scalar(0));
+    W.at<double>(0, 1) = -1;
+    W.at<double>(1, 0) = 1;
+    W.at<double>(2, 2) = 1;
+
+    Mat Wt(3, 3, CV_64F, Scalar(0));
+    Wt.at<double>(0, 1) = 1;
+    Wt.at<double>(1, 0) = -1;
+    Wt.at<double>(2, 2) = 1;
+
+    Mat R1 = U * W * Vt;
+    Mat R2 = U * Wt * Vt;
+    Mat u1 = U.col(2);
+    Mat t2 = -U.col(2);
+    //4 candidates
+    std::cout << "computed rotation, translation: " << std::endl;
+    std::cout << R1 << "," << u1 << std::endl;
+    R = R1;//R2
+    u = u1;
 }
 

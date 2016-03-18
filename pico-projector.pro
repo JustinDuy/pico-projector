@@ -13,18 +13,19 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-    myqwidget.cpp \
     utility.cpp \
     graycodedecoder.cpp
-
 HEADERS  += \
-    myqwidget.h \
     utility.h \
     graycodedecoder.h
 
-INCLUDEPATH += /usr/local/include/opencv2
-INCLUDEPATH += /usr/local/include/opencv
+#CV_LIB_NAMES = core imgproc highgui calib3d
+#for(lib, CV_LIB_NAMES) {
+#    CV_LIBS += -lopencv_$$lib
+#}
 
-LIBS += `pkg-config opencv --libs`
 
+INCLUDEPATH += /home/duy/opencv-3.1.0/release/include
+#LIBS += -L/home/duy/opencv-3/release/lib $$CV_LIBS
+LIBS += -L/home/duy/opencv-3.1.0/release/lib `pkg-config opencv --libs`
 FORMS    +=
