@@ -1,28 +1,18 @@
-#include <handprojector_calibration/graycodedecoder.h>
+#include <handprojector_calibration/graycode.h>
 #include <opencv2/calib3d.hpp>
 #include <iostream>
 #include <stdio.h>
 
-GrayCodeDecoder::GrayCodeDecoder()
-{
+using namespace std;
+using namespace cv;
 
-}
-
-/*
- *  GrayCodePattern
- */
-
-GrayCodeDecoder::GrayCodeDecoder( int _w, int _h)
-{
-  width = _w;
-  height = _h;
-  computeNumberOfPatternImages();
-  blackThreshold = 40;  // 3D_underworld default value
-  whiteThreshold = 5;   // 3D_underworld default value
-}
+namespace GrayCode {
+    
+const unsigned int DEFAULT_BLACK_THRESHOLD = 40;  // 3D_underworld default value
+const unsigned int DEFAULT_WHITE_THRESHOLD = 5;   // 3D_underworld default value
 
 // Computes the required number of pattern images
-void GrayCodeDecoder::computeNumberOfPatternImages()
+void computeNumberOfImages(size_t width, size_t height, size_t& numOfColImgs, size_t& numOfRowImgs, size_t& numOfPatternImages)
 {
   numOfColImgs = ( size_t ) ceil( log( double( width ) ) / log( 2.0 ) );
   numOfRowImgs = ( size_t ) ceil( log( double( height ) ) / log( 2.0 ) );
@@ -30,7 +20,7 @@ void GrayCodeDecoder::computeNumberOfPatternImages()
 }
 
 // Computes the shadows occlusion where we cannot reconstruct the model
-void GrayCodeDecoder::computeShadowMask( const Mat blackImage,const Mat whiteImage, double blackThreshold, Mat& shadowMask)
+void computeShadowMask( const Mat blackImage,const Mat whiteImage, double blackThreshold, Mat& shadowMask)
 {
 
     int cam_width = whiteImage.cols;
@@ -53,27 +43,53 @@ void GrayCodeDecoder::computeShadowMask( const Mat blackImage,const Mat whiteIma
         }
       }
     }
-
 }
-// For a (x,y) pixel of the camera returns the corresponding projector's pixel
-bool GrayCodeDecoder::getProjPixel( InputArrayOfArrays patternImages, int x, int y, Point &projPix )
+
+// Converts a gray code sequence (~ binary number) to a decimal number
+int grayToDec( const std::vector<uchar>& gray )
 {
-  std::vector<Mat>& _patternImages = *( std::vector<Mat>* ) patternImages.getObj();
+  int dec = 0;
+
+  uchar tmp = gray[0];
+
+  if( tmp )
+    dec += ( int ) pow( ( float ) 2, int( gray.size() - 1 ) );
+
+  for( int i = 1; i < (int) gray.size(); i++ )
+  {
+    // XOR operation
+    tmp = tmp ^ gray[i];
+    if( tmp )
+      dec += (int) pow( ( float ) 2, int( gray.size() - i - 1 ) );
+  }
+
+  return dec;
+}
+
+// For a (x,y) pixel of the camera returns the corresponding projector's pixel
+bool getProjPixel( const vector<Mat>& patternImages, int x, int y, Point &projPix )
+{
   std::vector<uchar> grayCol;
   std::vector<uchar> grayRow;
 
   bool error = false;
   int xDec, yDec;
+  
+  size_t width = patternImages[0].cols;
+  size_t height = patternImages[0].rows;
+  
+  size_t numOfColImgs, numOfRowImgs, numOfPatternImages;
+  computeNumberOfImages(width, height, numOfColImgs, numOfRowImgs, numOfPatternImages);
 
   // process column images
   for( size_t count = 0; count < numOfColImgs; count++ )
   {
     // get pixel intensity for regular pattern projection and its inverse
-    double val1 = _patternImages[count * 2].at<uchar>( Point( x, y ) );
-    double val2 = _patternImages[count * 2 + 1].at<uchar>( Point( x, y ) );
+    double val1 = patternImages[count * 2].at<uchar>( Point( x, y ) );
+    double val2 = patternImages[count * 2 + 1].at<uchar>( Point( x, y ) );
 
     // check if the intensity difference between the values of the normal and its inverse projection image is in a valid range
-    if( abs(val1 - val2) < whiteThreshold )
+    if( abs(val1 - val2) < DEFAULT_WHITE_THRESHOLD )
       error = true;
 
     // determine if projection pixel is on or off
@@ -89,11 +105,11 @@ bool GrayCodeDecoder::getProjPixel( InputArrayOfArrays patternImages, int x, int
   for( size_t count = 0; count < numOfRowImgs; count++ )
   {
     // get pixel intensity for regular pattern projection and its inverse
-    double val1 = _patternImages[count * 2 + numOfColImgs * 2].at<uchar>( Point( x, y ) );
-    double val2 = _patternImages[count * 2 + numOfColImgs * 2 + 1].at<uchar>( Point( x, y ) );
+    double val1 = patternImages[count * 2 + numOfColImgs * 2].at<uchar>( Point( x, y ) );
+    double val2 = patternImages[count * 2 + numOfColImgs * 2 + 1].at<uchar>( Point( x, y ) );
 
     // check if the intensity difference between the values of the normal and its inverse projection image is in a valid range
-    if( abs(val1 - val2) < whiteThreshold )
+    if( abs(val1 - val2) < DEFAULT_WHITE_THRESHOLD )
       error = true;
 
     // determine if projection pixel is on or off
@@ -116,35 +132,13 @@ bool GrayCodeDecoder::getProjPixel( InputArrayOfArrays patternImages, int x, int
   return error;
 }
 
-// Converts a gray code sequence (~ binary number) to a decimal number
-int GrayCodeDecoder::grayToDec( const std::vector<uchar>& gray )
-{
-  int dec = 0;
-
-  uchar tmp = gray[0];
-
-  if( tmp )
-    dec += ( int ) pow( ( float ) 2, int( gray.size() - 1 ) );
-
-  for( int i = 1; i < (int) gray.size(); i++ )
-  {
-    // XOR operation
-    tmp = tmp ^ gray[i];
-    if( tmp )
-      dec += (int) pow( ( float ) 2, int( gray.size() - i - 1 ) );
-  }
-
-  return dec;
-}
-
-
-void GrayCodeDecoder::decode( vector<Mat> patternImages, const Mat& blackImage, const Mat& whiteImage,
+void decode( vector<Mat> patternImages, const Mat& blackImage, const Mat& whiteImage,
                               const Mat& Kp, const Mat& Kc, Mat& R, Mat& u)
 // output : camera-projector stereo matrix R, u
 {
     // Computing shadows mask
     Mat shadowMask;
-    computeShadowMask( blackImage, whiteImage, blackThreshold, shadowMask );
+    computeShadowMask( blackImage, whiteImage, DEFAULT_BLACK_THRESHOLD, shadowMask );
     int cam_width = patternImages[0].cols;
     int cam_height = patternImages[0].rows;
 
@@ -152,7 +146,7 @@ void GrayCodeDecoder::decode( vector<Mat> patternImages, const Mat& blackImage, 
     // Storage for the pixels of the camera that correspond to the same pixel of the projector
     std::vector<Point> camPixels;
     std::vector<Point> projPixels;
-    camPixels.resize( height * width );
+    camPixels.resize( cam_height * cam_width );
     for( int i = 0; i < cam_width; i++ )
     {
         for( int j = 0; j < cam_height; j++ )
@@ -213,3 +207,4 @@ void GrayCodeDecoder::decode( vector<Mat> patternImages, const Mat& blackImage, 
     u = u1;
 }
 
+}
