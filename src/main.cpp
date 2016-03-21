@@ -28,16 +28,7 @@ static void help()
 }
 
 void kroneckerProduct(const Mat& a, const Mat& b, Mat& product);
-void estimateCameraProjectorPose(const vector<Mat>& captured_patterns, 
-                                    int pro_width, 
-                                    int pro_height, 
-                                    const Mat& blackImage,
-                                    const Mat& whiteImage,
-                                    const Mat& Kc, 
-                                    const Mat& camdistCoeffs, 
-                                    const Mat& Kp, 
-                                    Mat& Ra, 
-                                    Mat& ua);
+
 void composeLinearSystem(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat& tb, Mat& M, int poseNum );
 void capturePatterns(VideoCapture& capture, const vector<Mat>& pattern, vector<Mat>& captured_patterns, Mat& black_image, Mat& white_image);
 
@@ -80,7 +71,7 @@ int main( int argc, char** argv )
     
     const size_t CAMERA_WIDTH = 1280;   
     const size_t CAMERA_HEIGHT = 720;   
-    vector<Mat> pattern = GrayCode::generate(CAMERA_WIDTH, CAMERA_HEIGHT);
+    vector<Mat> pattern = ProjectorLocalizer::generatePatterns(CAMERA_WIDTH, CAMERA_HEIGHT);
 
     namedWindow( "cam1", WINDOW_NORMAL );
     resizeWindow( "cam1", 640, 480 );
@@ -118,7 +109,7 @@ int main( int argc, char** argv )
         vector<Mat> captured_patterns;
         Mat blackImage, whiteImage;
         capturePatterns(capture, pattern, captured_patterns, blackImage, whiteImage);
-        estimateCameraProjectorPose(captured_patterns, CAMERA_WIDTH, CAMERA_HEIGHT, blackImage, whiteImage, 
+        ProjectorLocalizer::estimateCameraProjectorPose(captured_patterns, CAMERA_WIDTH, CAMERA_HEIGHT, blackImage, whiteImage, 
                                        cam1intrinsics, cam1distCoeffs, prointrinsics, Ra, ua);
         //read in Robot Hand-Base transformation : Rb,tb
         Mat Rb, tb;
@@ -280,31 +271,4 @@ void capturePatterns(VideoCapture& capture, const vector<Mat>& pattern, vector<M
     
 }
 
-void estimateCameraProjectorPose(const vector<Mat>& captured_patterns, 
-                                    int pro_width, 
-                                    int pro_height, 
-                                    const Mat& blackImage,
-                                    const Mat& whiteImage,
-                                    const Mat& Kc, 
-                                    const Mat& camdistCoeffs, 
-                                    const Mat& Kp, 
-                                    Mat& Ra, 
-                                    Mat& ua)
-{
-    //decode graycode
 
-    //loading Kinect RGB Instrinsic and Distortion coeffs: TODO 
-    Size imagesSize = blackImage.size();
-    Mat R1, map1x, map1y;
-
-    initUndistortRectifyMap( Kc, camdistCoeffs, R1, Kc, imagesSize, CV_32FC1, map1x, map1y );
-    //R1 empty -> default identity transformation
-
-    //rectify all captured patterns before decoding
-    for(int i=0; i< captured_patterns.size(); i++){
-        remap( captured_patterns[i], captured_patterns[i], map1x, map1y, INTER_NEAREST, BORDER_CONSTANT, Scalar() );
-    }
-    remap( blackImage, blackImage, map1x, map1y, INTER_NEAREST, BORDER_CONSTANT, Scalar() );
-    remap( whiteImage, whiteImage, map1x, map1y, INTER_NEAREST, BORDER_CONSTANT, Scalar() );
-    GrayCode::decode(captured_patterns, blackImage, whiteImage, Kp, Kc, Ra, ua);
-}

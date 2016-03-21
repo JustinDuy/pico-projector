@@ -5,20 +5,22 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/structured_light.hpp>
 
-namespace GrayCode {
+namespace ProjectorLocalizer {
     
-std::vector<cv::Mat> generate(size_t width, size_t height);
+std::vector<cv::Mat> generatePatterns(size_t width, size_t height);
+    
+void estimateCameraProjectorPose(const std::vector<cv::Mat>& captured_patterns, 
+                                    int pro_width, 
+                                    int pro_height, 
+                                    const cv::Mat& blackImage,
+                                    const cv::Mat& whiteImage,
+                                    const cv::Mat& Kc, 
+                                    const cv::Mat& camdistCoeffs, 
+                                    const cv::Mat& Kp, 
+                                    cv::Mat& Ra, 
+                                    cv::Mat& ua);
+    
 
-//decode graycode
-void decode(std::vector<cv::Mat> patternImages, 
-            const cv::Mat& blackImage, 
-            const cv::Mat& whiteImage,
-            const cv::Mat& Kp, 
-            const cv::Mat& Kc, 
-            cv::Mat& R, 
-            cv::Mat& u);
-
-// TODO: generate
 
 }
 
