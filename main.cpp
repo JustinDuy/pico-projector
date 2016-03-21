@@ -135,6 +135,10 @@ int main( int argc, char** argv )
         //update linear system to solve
         formLinSys(Ra,ua,Rb,tb,M, pose+1);
     }
+    //solve for R_x,t_x,R_z,t_z:
+    Mat b = Mat::zeros(12*numOfPose,1);
+    Mat out;
+    solve(M,b,out,DECOMP_NORMAL);
     // the camera will be deinitialized automatically in VideoCapture destructor
     return 0;
 }
