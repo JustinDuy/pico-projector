@@ -10,7 +10,7 @@ include_directories(include ${OpenCV_INCLUDE_DIRS})
 
 add_library(${PROJECT_NAME} 
     src/utility.cpp
-    src/graycodedecoder.cpp
+    src/graycode.cpp
 )
 
 add_executable(${PROJECT_NAME}_main src/main.cpp)

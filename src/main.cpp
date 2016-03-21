@@ -1,4 +1,4 @@
-#include <handprojector_calibration/graycodedecoder.h>
+#include <handprojector_calibration/graycode.h>
 #include <handprojector_calibration/utility.h>
 
 #include <QApplication>
@@ -27,7 +27,7 @@ static void help()
          << endl;
 }
 
-void kronnecker(const Mat& a, const Mat& b, Mat& product);
+void kroneckerProduct(const Mat& a, const Mat& b, Mat& product);
 void estimateCameraProjectorPose(const vector<Mat>& captured_patterns, 
                                     int pro_width, 
                                     int pro_height, 
@@ -39,8 +39,7 @@ void estimateCameraProjectorPose(const vector<Mat>& captured_patterns,
                                     Mat& Ra, 
                                     Mat& ua);
 void composeLinearSystem(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat& tb, Mat& M, int poseNum );
-void captureBlackAndWhiteImages(VideoCapture& capture, Mat& blackImage, Mat& whiteImage);
-vector<Mat> capturePatterns(VideoCapture& capture, int numberOfPatternImages, const vector<Mat>& pattern);
+void capturePatterns(VideoCapture& capture, const vector<Mat>& pattern, vector<Mat>& captured_patterns, Mat& black_image, Mat& white_image);
 
 String captured_path = "/home/duy/pico-projector/captured/";
 
@@ -139,12 +138,12 @@ int main( int argc, char** argv )
      *
      **********************************************************************************/
     Mat M;
-    Mat blackImage, whiteImage;
-    captureBlackAndWhiteImages(capture, blackImage, whiteImage);
     for(int pose = 0; pose < numOfPose; pose++){
         //estimate Ra, ua: using graycode
         Mat Ra, ua;
-        vector<Mat> captured_patterns = capturePatterns(capture, numberOfPatternImages, pattern);
+        vector<Mat> captured_patterns;
+        Mat blackImage, whiteImage;
+        capturePatterns(capture, pattern, captured_patterns, blackImage, whiteImage);
         estimateCameraProjectorPose(captured_patterns, params.width, params.height, blackImage, whiteImage, 
                                        cam1intrinsics, cam1distCoeffs, prointrinsics, Ra, ua);
         //read in Robot Hand-Base transformation : Rb,tb
@@ -175,12 +174,12 @@ void composeLinearSystem(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat&
         //add 12x24 matrix
         int offset_y = 12 * (poseNum -1) ;
         Mat tmp ;//= Mat::zeros(9,9, CV_64F);
-        kronnecker(Ra, Rb, tmp);
+        kroneckerProduct(Ra, Rb, tmp);
         tmp.copyTo(ret(Rect(0,offset_y,9,9)));
         Mat I9 = Mat::eye(9,9,CV_64F);
         Mat I3 = Mat::eye(3,3,CV_64F);
         I9.copyTo(ret(Rect(9,offset_y,9,9)));
-        kronnecker(I3,tb.t(), tmp);
+        kroneckerProduct(I3,tb.t(), tmp);
         tmp.copyTo(ret(Rect(9,9 + offset_y,9,3)));
         Mat neg_Ra = (-1) * Ra ;
         neg_Ra.copyTo(ret(Rect(18,9 + offset_y,3,3)));
@@ -195,12 +194,12 @@ void composeLinearSystem(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat&
     else if(poseNum == 1){
         //M = Mat::zeros(12, 25, CV_64F);
         Mat tmp ;//= Mat::zeros(9,9, CV_64F);
-        kronnecker(Ra, Rb, tmp);
+        kroneckerProduct(Ra, Rb, tmp);
         tmp.copyTo(ret(Rect(0,0,9,9)));
         Mat I9 = Mat::eye(9,9,CV_64F);
         Mat I3 = Mat::eye(3,3,CV_64F);
         I9.copyTo(ret(Rect(9,0,9,9)));
-        kronnecker(I3,tb.t(), tmp);
+        kroneckerProduct(I3,tb.t(), tmp);
         tmp.copyTo(ret(Rect(9,9,9,3)));
         Mat neg_Ra = (-1) * Ra ;
         neg_Ra.copyTo(ret(Rect(18,9,3,3)));
@@ -212,7 +211,7 @@ void composeLinearSystem(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat&
     cout << M << endl;
 }
 
-void kronnecker(const Mat& a, const Mat& b, Mat& product)
+void kroneckerProduct(const Mat& a, const Mat& b, Mat& product)
 {
     int m = a.rows;
     int n = a.cols;
@@ -236,13 +235,13 @@ void kronnecker(const Mat& a, const Mat& b, Mat& product)
     }
 }
 
-vector<Mat> capturePatterns(VideoCapture& capture, int numberOfPatternImages, const vector<Mat>& pattern) {
+void capturePatterns(VideoCapture& capture, const vector<Mat>& pattern, vector<Mat>& captured_patterns, Mat& black_image, Mat& white_image) 
+{
     //for captured images
-    vector<Mat>  captured_patterns;
     Mat blackImage, whiteImage;
 
     int i =0;
-    while( i < numberOfPatternImages )
+    while( i < pattern.size() )
     {
       cout << "Waiting to save image number " << i + 1 << endl << "Press any key to acquire the photo" << endl;
       imshow( "Pattern Window", pattern[i] );
@@ -280,10 +279,10 @@ vector<Mat> capturePatterns(VideoCapture& capture, int numberOfPatternImages, co
                 captured_patterns.push_back(frame1);
             }
             else if(i == pattern.size() -2){
-                whiteImage = frame1.clone();
+                white_image = frame1.clone();
             }
             else if(i == pattern.size() -1){
-                blackImage = frame1.clone();
+                black_image = frame1.clone();
             }
             i++;
           }
@@ -305,15 +304,6 @@ vector<Mat> capturePatterns(VideoCapture& capture, int numberOfPatternImages, co
     }
     //end while loop for capturing patterns
     
-    return captured_patterns;
-}
-
-void captureBlackAndWhiteImages(VideoCapture& capture, Mat& blackImage, Mat& whiteImage) {
-    // TODO: extracted from capturePatterns; are they just some random image????
-    
-    Mat frame1;
-    whiteImage = frame1.clone();
-    blackImage = frame1.clone();
 }
 
 void estimateCameraProjectorPose(const vector<Mat>& captured_patterns, 
@@ -342,6 +332,5 @@ void estimateCameraProjectorPose(const vector<Mat>& captured_patterns,
     }
     remap( blackImage, blackImage, map1x, map1y, INTER_NEAREST, BORDER_CONSTANT, Scalar() );
     remap( whiteImage, whiteImage, map1x, map1y, INTER_NEAREST, BORDER_CONSTANT, Scalar() );
-    GrayCodeDecoder decoder(pro_width, pro_height);
-    decoder.decode(captured_patterns, blackImage, whiteImage, Kp, Kc, Ra, ua);
+    GrayCode::decode(captured_patterns, blackImage, whiteImage, Kp, Kc, Ra, ua);
 }

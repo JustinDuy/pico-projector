@@ -1,4 +1,4 @@
-#include <handprojector_calibration/graycodedecoder.h>
+#include <handprojector_calibration/graycode.h>
 #include <handprojector_calibration/utility.h>
 
 namespace Utility {
