@@ -1,7 +1,8 @@
 #include <handprojector_calibration/graycodedecoder.h>
 #include <handprojector_calibration/utility.h>
 
-namespace Utility{
+namespace Utility {
+    
 QImage  cvMatToQImage( const cv::Mat &inMat )
 {
   switch ( inMat.type() )
@@ -48,8 +49,10 @@ QImage  cvMatToQImage( const cv::Mat &inMat )
 
   return QImage();
 }
+
 QPixmap cvMatToQPixmap( const cv::Mat &inMat )
 {
   return QPixmap::fromImage( cvMatToQImage( inMat ) );
 }
+
 }

@@ -28,9 +28,19 @@ static void help()
 }
 
 void kronnecker(const Mat& a, const Mat& b, Mat& product);
-void estimate_Camera_Projector_Pose(vector<Mat> pattern, int pro_width, int pro_height, int numberOfPatternImages, VideoCapture capture,
-                                    const Mat& Kc, const Mat& camdistCoeffs, const Mat& Kp, Mat& Ra, Mat& ua);
-void formLinSys(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat& tb, Mat& M, int poseNum );
+void estimateCameraProjectorPose(const vector<Mat>& captured_patterns, 
+                                    int pro_width, 
+                                    int pro_height, 
+                                    const Mat& blackImage,
+                                    const Mat& whiteImage,
+                                    const Mat& Kc, 
+                                    const Mat& camdistCoeffs, 
+                                    const Mat& Kp, 
+                                    Mat& Ra, 
+                                    Mat& ua);
+void composeLinearSystem(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat& tb, Mat& M, int poseNum );
+void captureBlackAndWhiteImages(VideoCapture& capture, Mat& blackImage, Mat& whiteImage);
+vector<Mat> capturePatterns(VideoCapture& capture, int numberOfPatternImages, const vector<Mat>& pattern);
 
 String captured_path = "/home/duy/pico-projector/captured/";
 
@@ -119,7 +129,7 @@ int main( int argc, char** argv )
       return -1;
     }
 
-    int numOfPose = 6; //as least 3 poses are neccessary
+    int numOfPose = 6; // at least 3 poses are necessary
     /**********************************************************************************
      * linear system : to be updated every pose
      *
@@ -129,15 +139,18 @@ int main( int argc, char** argv )
      *
      **********************************************************************************/
     Mat M;
+    Mat blackImage, whiteImage;
+    captureBlackAndWhiteImages(capture, blackImage, whiteImage);
     for(int pose = 0; pose < numOfPose; pose++){
         //estimate Ra, ua: using graycode
         Mat Ra, ua;
-        estimate_Camera_Projector_Pose(pattern, params.width, params.height, numberOfPatternImages,capture,
-                                       cam1intrinsics, cam1distCoeffs, prointrinsics, Ra,ua);
+        vector<Mat> captured_patterns = capturePatterns(capture, numberOfPatternImages, pattern);
+        estimateCameraProjectorPose(captured_patterns, params.width, params.height, blackImage, whiteImage, 
+                                       cam1intrinsics, cam1distCoeffs, prointrinsics, Ra, ua);
         //read in Robot Hand-Base transformation : Rb,tb
         Mat Rb, tb;
         //update linear system to solve
-        formLinSys(Ra,ua,Rb,tb,M, pose+1);
+        composeLinearSystem(Ra,ua,Rb,tb,M, pose+1);
     }
     //solve for R_x,t_x,R_z,t_z:
     Mat b = Mat::zeros(12*numOfPose,1,CV_64F);
@@ -147,7 +160,7 @@ int main( int argc, char** argv )
     return 0;
 }
 
-void formLinSys(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat& tb, Mat& M, int poseNum )
+void composeLinearSystem(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat& tb, Mat& M, int poseNum )
 {
     int curRows = M.rows;
     int curCols = M.cols;
@@ -223,20 +236,9 @@ void kronnecker(const Mat& a, const Mat& b, Mat& product)
     }
 }
 
-void estimate_Camera_Projector_Pose(vector<Mat> pattern, 
-                                    int pro_width, 
-                                    int pro_height, 
-                                    int numberOfPatternImages, 
-                                    VideoCapture capture,
-                                    const Mat& Kc, 
-                                    const Mat& camdistCoeffs, 
-                                    const Mat& Kp, 
-                                    Mat& Ra, 
-                                    Mat& ua)
-{
+vector<Mat> capturePatterns(VideoCapture& capture, int numberOfPatternImages, const vector<Mat>& pattern) {
     //for captured images
     vector<Mat>  captured_patterns;
-    captured_patterns.resize( numberOfPatternImages );
     Mat blackImage, whiteImage;
 
     int i =0;
@@ -249,7 +251,7 @@ void estimate_Camera_Projector_Pose(vector<Mat> pattern,
       //capture.retrieve( depthMap, CV_CAP_OPENNI_DEPTH_MAP );
       capture.retrieve( frame1, CV_CAP_OPENNI_BGR_IMAGE );
 
-      if( frame1.data  )
+      if( frame1.data )
       {
         Mat tmp;
         cout << "Kinect rgb cam  size: " << Size( ( int ) capture.get( CV_CAP_PROP_FRAME_WIDTH ), ( int ) capture.get( CV_CAP_PROP_FRAME_HEIGHT ) )
@@ -302,10 +304,32 @@ void estimate_Camera_Projector_Pose(vector<Mat> pattern,
       }
     }
     //end while loop for capturing patterns
+    
+    return captured_patterns;
+}
 
+void captureBlackAndWhiteImages(VideoCapture& capture, Mat& blackImage, Mat& whiteImage) {
+    // TODO: extracted from capturePatterns; are they just some random image????
+    
+    Mat frame1;
+    whiteImage = frame1.clone();
+    blackImage = frame1.clone();
+}
+
+void estimateCameraProjectorPose(const vector<Mat>& captured_patterns, 
+                                    int pro_width, 
+                                    int pro_height, 
+                                    const Mat& blackImage,
+                                    const Mat& whiteImage,
+                                    const Mat& Kc, 
+                                    const Mat& camdistCoeffs, 
+                                    const Mat& Kp, 
+                                    Mat& Ra, 
+                                    Mat& ua)
+{
     //decode graycode
 
-    //loading Kinect RGB Instrinsic and Distortion coeffs: To Do
+    //loading Kinect RGB Instrinsic and Distortion coeffs: TODO 
     Size imagesSize = blackImage.size();
     Mat R1, map1x, map1y;
 
@@ -320,5 +344,4 @@ void estimate_Camera_Projector_Pose(vector<Mat> pattern,
     remap( whiteImage, whiteImage, map1x, map1y, INTER_NEAREST, BORDER_CONSTANT, Scalar() );
     GrayCodeDecoder decoder(pro_width, pro_height);
     decoder.decode(captured_patterns, blackImage, whiteImage, Kp, Kc, Ra, ua);
-
 }
