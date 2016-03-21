@@ -6,6 +6,8 @@
 #include <opencv2/structured_light.hpp>
 
 namespace GrayCode {
+    
+std::vector<cv::Mat> generate(size_t width, size_t height);
 
 //decode graycode
 void decode(std::vector<cv::Mat> patternImages, 

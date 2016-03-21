@@ -1,12 +1,40 @@
 #include <handprojector_calibration/graycode.h>
 #include <opencv2/calib3d.hpp>
 #include <iostream>
-#include <stdio.h>
+#include <stdexcept>
 
 using namespace std;
 using namespace cv;
 
 namespace GrayCode {
+    
+vector<Mat> generate(size_t width, size_t height) {
+    structured_light::GrayCodePattern::Params params;
+
+    params.width = width;
+    params.height = height;
+    if( params.width < 1 || params.height < 1 )
+    {
+      throw runtime_error("Invalid width or height");
+    }
+
+    // Set up GraycodePattern with params
+    Ptr<structured_light::GrayCodePattern> graycode = structured_light::GrayCodePattern::create( params );
+    // Storage for pattern
+    vector<Mat> pattern;
+    graycode->generate( pattern );
+    size_t numberOfPatternImages = pattern.size();
+    cout << numberOfPatternImages << " pattern images + 2 images for shadows mask computation to acquire with both cameras"
+           << endl;
+    // Generate the all-white and all-black images needed for shadows mask computation
+    Mat white;
+    Mat black;
+    graycode->getImagesForShadowMasks( black, white );
+    pattern.push_back ( black );
+    pattern.push_back ( white );
+    
+    return pattern;
+}
     
 const unsigned int DEFAULT_BLACK_THRESHOLD = 40;  // 3D_underworld default value
 const unsigned int DEFAULT_WHITE_THRESHOLD = 5;   // 3D_underworld default value
@@ -46,7 +74,7 @@ void computeShadowMask( const Mat blackImage,const Mat whiteImage, double blackT
 }
 
 // Converts a gray code sequence (~ binary number) to a decimal number
-int grayToDec( const std::vector<uchar>& gray )
+int grayToDec( const vector<uchar>& gray )
 {
   int dec = 0;
 
@@ -69,8 +97,8 @@ int grayToDec( const std::vector<uchar>& gray )
 // For a (x,y) pixel of the camera returns the corresponding projector's pixel
 bool getProjPixel( const vector<Mat>& patternImages, int x, int y, Point &projPix )
 {
-  std::vector<uchar> grayCol;
-  std::vector<uchar> grayRow;
+  vector<uchar> grayCol;
+  vector<uchar> grayRow;
 
   bool error = false;
   int xDec, yDec;
@@ -144,8 +172,8 @@ void decode( vector<Mat> patternImages, const Mat& blackImage, const Mat& whiteI
 
     Point projPixel;
     // Storage for the pixels of the camera that correspond to the same pixel of the projector
-    std::vector<Point> camPixels;
-    std::vector<Point> projPixels;
+    vector<Point> camPixels;
+    vector<Point> projPixels;
     camPixels.resize( cam_height * cam_width );
     for( int i = 0; i < cam_width; i++ )
     {
@@ -201,8 +229,8 @@ void decode( vector<Mat> patternImages, const Mat& blackImage, const Mat& whiteI
     Mat u1 = U.col(2);
     Mat t2 = -U.col(2);
     //4 candidates
-    std::cout << "computed rotation, translation: " << std::endl;
-    std::cout << R1 << "," << u1 << std::endl;
+    cout << "computed rotation, translation: " << endl;
+    cout << R1 << "," << u1 << endl;
     R = R1;//R2
     u = u1;
 }
