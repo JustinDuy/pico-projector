@@ -1,6 +1,7 @@
+#include <handprojector_calibration/graycodedecoder.h>
+#include <handprojector_calibration/utility.h>
+
 #include <QApplication>
-#include <QDebug>
-#include <stdio.h>
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QWidget>
@@ -11,10 +12,6 @@
 #include <opencv2/structured_light.hpp>
 
 #include <iostream>
-
-#include <handprojector_calibration/graycodedecoder.h>
-#include <handprojector_calibration/utility.h>
-#include <cstdio>
 
 using namespace cv;
 using namespace std;
@@ -149,7 +146,9 @@ int main( int argc, char** argv )
     // the camera will be deinitialized automatically in VideoCapture destructor
     return 0;
 }
-void formLinSys(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat& tb, Mat& M, int poseNum ){
+
+void formLinSys(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat& tb, Mat& M, int poseNum )
+{
     int curRows = M.rows;
     int curCols = M.cols;
     Mat ret = Mat::zeros(12*poseNum, 24+poseNum, CV_64F);
@@ -199,7 +198,9 @@ void formLinSys(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat& tb, Mat&
     M = ret;
     cout << M << endl;
 }
-void kronnecker(const Mat& a, const Mat& b, Mat& product){
+
+void kronnecker(const Mat& a, const Mat& b, Mat& product)
+{
     int m = a.rows;
     int n = a.cols;
 
@@ -221,7 +222,18 @@ void kronnecker(const Mat& a, const Mat& b, Mat& product){
         }
     }
 }
-void estimate_Camera_Projector_Pose(vector<Mat> pattern, int pro_width, int pro_height, int numberOfPatternImages, VideoCapture capture,const Mat& Kc, const Mat& camdistCoeffs, const Mat& Kp, Mat& Ra, Mat& ua){
+
+void estimate_Camera_Projector_Pose(vector<Mat> pattern, 
+                                    int pro_width, 
+                                    int pro_height, 
+                                    int numberOfPatternImages, 
+                                    VideoCapture capture,
+                                    const Mat& Kc, 
+                                    const Mat& camdistCoeffs, 
+                                    const Mat& Kp, 
+                                    Mat& Ra, 
+                                    Mat& ua)
+{
     //for captured images
     vector<Mat>  captured_patterns;
     captured_patterns.resize( numberOfPatternImages );

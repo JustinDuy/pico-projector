@@ -4,10 +4,10 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/structured_light.hpp>
-#include <cstdio>
 
 using namespace cv;
 using namespace std;
+
 class GrayCodeDecoder
 {
 public:
@@ -51,6 +51,5 @@ private:
     void computeNumberOfPatternImages();
 
 };
-
 
 #endif // GRAYCODEDECODER_H

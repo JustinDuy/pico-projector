@@ -29,8 +29,6 @@ void GrayCodeDecoder::computeNumberOfPatternImages()
   numOfPatternImages = 2 * numOfColImgs + 2 * numOfRowImgs;
 }
 
-
-
 // Computes the shadows occlusion where we cannot reconstruct the model
 void GrayCodeDecoder::computeShadowMask( const Mat blackImage,const Mat whiteImage, double blackThreshold, Mat& shadowMask)
 {
