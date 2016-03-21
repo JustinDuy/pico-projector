@@ -41,33 +41,21 @@ void estimateCameraProjectorPose(const vector<Mat>& captured_patterns,
 void composeLinearSystem(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat& tb, Mat& M, int poseNum );
 void capturePatterns(VideoCapture& capture, const vector<Mat>& pattern, vector<Mat>& captured_patterns, Mat& black_image, Mat& white_image);
 
-String captured_path = "/home/duy/pico-projector/captured/";
+String captured_path = "captured/";
 
 int main( int argc, char** argv )
 {
     QApplication a(argc, argv);
-    structured_light::GrayCodePattern::Params params;
-    //CommandLineParser parser( argc, argv, keys );
-    //String captured_path = parser.get<String>( 0 );
-    //params.width = parser.get<int>( 1 );
-    //params.height = parser.get<int>( 2 );
-
-    params.width = 1280;
-    params.height = 720;
-    if( captured_path.empty() || params.width < 1 || params.height < 1 )
-    {
-      help();
-      return -1;
-    }
+    
     //load Kinect calibration file
-    FileStorage fs( "/home/duy/pico-projector/rgb_A00363813595051A.yaml", FileStorage::READ );
+    FileStorage fs( "data/rgb_A00363813595051A.yaml", FileStorage::READ );
     if( !fs.isOpened() )
     {
       cout << "Failed to open Camera Calibration Data File." << endl;
       help();
       return -1;
     }
-    FileStorage fs2( "/home/duy/pico-projector/calibration.yml", FileStorage::READ);
+    FileStorage fs2( "data/calibration.yml", FileStorage::READ);
     if( !fs2.isOpened()){
         cout << "Failed to open Projector Calibration Data File." << endl;
     }
@@ -89,24 +77,10 @@ int main( int argc, char** argv )
       help();
       return -1;
     }
-
-    // Set up GraycodePattern with params
-    Ptr<structured_light::GrayCodePattern> graycode = structured_light::GrayCodePattern::create( params );
-    // Storage for pattern
-    vector<Mat> pattern;
-    graycode->generate( pattern );
-    size_t numberOfPatternImages = pattern.size();
-    cout << numberOfPatternImages << " pattern images + 2 images for shadows mask computation to acquire with both cameras"
-           << endl;
-    // Generate the all-white and all-black images needed for shadows mask computation
-    Mat white;
-    Mat black;
-    graycode->getImagesForShadowMasks( black, white );
-    pattern.insert (  pattern.begin() , black );
-    pattern.insert (  pattern.begin() , white );
-    //pattern.push_back( white );
-    //pattern.push_back( black );
-
+    
+    const size_t CAMERA_WIDTH = 1280;   
+    const size_t CAMERA_HEIGHT = 720;   
+    vector<Mat> pattern = GrayCode::generate(CAMERA_WIDTH, CAMERA_HEIGHT);
 
     namedWindow( "cam1", WINDOW_NORMAL );
     resizeWindow( "cam1", 640, 480 );
@@ -114,8 +88,8 @@ int main( int argc, char** argv )
 
     // Setting pattern window on second monitor (the projector's one)
     namedWindow( "Pattern Window", WINDOW_NORMAL );
-    resizeWindow( "Pattern Window", params.width, params.height );
-    moveWindow( "Pattern Window", params.width + 316, -20 );
+    resizeWindow( "Pattern Window", CAMERA_WIDTH, CAMERA_HEIGHT );
+    moveWindow( "Pattern Window", CAMERA_WIDTH + 316, -20 );
     setWindowProperty( "Pattern Window", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN );
 
     // Open kinect rgb cam, using openni
@@ -144,7 +118,7 @@ int main( int argc, char** argv )
         vector<Mat> captured_patterns;
         Mat blackImage, whiteImage;
         capturePatterns(capture, pattern, captured_patterns, blackImage, whiteImage);
-        estimateCameraProjectorPose(captured_patterns, params.width, params.height, blackImage, whiteImage, 
+        estimateCameraProjectorPose(captured_patterns, CAMERA_WIDTH, CAMERA_HEIGHT, blackImage, whiteImage, 
                                        cam1intrinsics, cam1distCoeffs, prointrinsics, Ra, ua);
         //read in Robot Hand-Base transformation : Rb,tb
         Mat Rb, tb;

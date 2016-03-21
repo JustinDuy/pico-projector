@@ -15,3 +15,5 @@ add_library(${PROJECT_NAME}
 
 add_executable(${PROJECT_NAME}_main src/main.cpp)
 target_link_libraries(${PROJECT_NAME}_main ${PROJECT_NAME} ${OpenCV_LIBS} ${QT_LIBRARIES})
+
+install(DIRECTORY data DESTINATION ${CMAKE_BINARY_DIR})
