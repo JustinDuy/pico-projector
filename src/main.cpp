@@ -11,13 +11,17 @@
 #include <opencv2/structured_light.hpp>
 
 #include <iostream>
-#include <stdio.h>
-#include <utility.h>
-#include "graycodedecoder.h"
+
+#include <handprojector_calibration/graycodedecoder.h>
+#include <handprojector_calibration/utility.h>
+#include <cstdio>
+
 using namespace cv;
 using namespace std;
 using namespace Utility;
+
 void project(Mat img);
+
 static void help()
 {
     cout << "\nThis example shows how to use the \"Structured Light module\" to acquire a graycode pattern"
@@ -25,11 +29,14 @@ static void help()
          "./example_structured_light_cap_pattern <path> <proj_width> <proj_height> \n"
          << endl;
 }
+
 void kronnecker(const Mat& a, const Mat& b, Mat& product);
 void estimate_Camera_Projector_Pose(vector<Mat> pattern, int pro_width, int pro_height, int numberOfPatternImages, VideoCapture capture,
                                     const Mat& Kc, const Mat& camdistCoeffs, const Mat& Kp, Mat& Ra, Mat& ua);
 void formLinSys(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat& tb, Mat& M, int poseNum );
+
 String captured_path = "/home/duy/pico-projector/captured/";
+
 int main( int argc, char** argv )
 {
     QApplication a(argc, argv);

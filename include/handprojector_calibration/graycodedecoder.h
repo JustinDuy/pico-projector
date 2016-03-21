@@ -1,9 +1,10 @@
 #ifndef GRAYCODEDECODER_H
 #define GRAYCODEDECODER_H
+
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/structured_light.hpp>
-#include <stdio.h>
+#include <cstdio>
 
 using namespace cv;
 using namespace std;

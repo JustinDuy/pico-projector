@@ -1,4 +1,4 @@
-#include "graycodedecoder.h"
+#include <handprojector_calibration/graycodedecoder.h>
 #include <opencv2/calib3d.hpp>
 #include <iostream>
 #include <stdio.h>
