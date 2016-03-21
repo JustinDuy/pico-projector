@@ -1,0 +1,2 @@
+/home/duy/pico-projector/release/CMakeFiles/handprojector_calibration.dir
+/home/duy/pico-projector/release/CMakeFiles/handprojector_calibration_main.dir

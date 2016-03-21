@@ -1,0 +1,2 @@
+/usr/bin/ar cr libhandprojector_calibration.a  CMakeFiles/handprojector_calibration.dir/src/graycode.cpp.o
+/usr/bin/ranlib libhandprojector_calibration.a
