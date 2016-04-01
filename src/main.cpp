@@ -1,5 +1,4 @@
 #include <handprojector_calibration/graycode.h>
-#include <handprojector_calibration/utility.h>
 
 #include <QApplication>
 #include <QDebug>
@@ -15,8 +14,6 @@
 
 using namespace cv;
 using namespace std;
-using namespace Utility;
-
 void project(Mat img);
 
 static void help()
@@ -92,34 +89,52 @@ int main( int argc, char** argv )
       help();
       return -1;
     }
-
-    int numOfPose = 6; // at least 3 poses are necessary
-    /**********************************************************************************
-     * linear system : to be updated every pose
-     *
-     * M x [vec(Rx);vec(Rz);tx;tz;[lamda1,lamda2,...,lamda_i]^T] = 0
-     *
-     * M dim = (12 * #pose) x (24 + #pose)
-     *
-     **********************************************************************************/
-    Mat M;
-    for(int pose = 0; pose < numOfPose; pose++){
-        //estimate Ra, ua: using graycode
-        Mat Ra, ua;
+    bool known_Z = true;
+    if(!known_Z){
+        //Camera-base is not known
+        int numOfPose = 6; // at least 3 poses are necessary
+        /**********************************************************************************
+         * linear system : to be updated every pose
+         *
+         * M x [vec(Rx);vec(Rz);tx;tz;[lamda1,lamda2,...,lamda_i]^T] = 0
+         *
+         * M dim = (12 * #pose) x (24 + #pose)
+         *
+         **********************************************************************************/
+        Mat M;
+        for(int pose = 0; pose < numOfPose; pose++){
+            //estimate Ra, ua: using graycode
+            Mat Ra, ua;
+            vector<Mat> captured_patterns;
+            Mat blackImage, whiteImage;
+            capturePatterns(capture, pattern, captured_patterns, blackImage, whiteImage);
+            ProjectorLocalizer::estimateCameraProjectorPose(captured_patterns, CAMERA_WIDTH, CAMERA_HEIGHT, blackImage, whiteImage,
+                                           cam1intrinsics, cam1distCoeffs, prointrinsics, Ra, ua);
+            //read in Robot Hand-Base transformation : Rb,tb
+            Mat Rb, tb;
+            //update linear system to solve
+            composeLinearSystem(Ra,ua,Rb,tb,M, pose+1);
+        }
+        //solve for R_x,t_x,R_z,t_z:
+        Mat b = Mat::zeros(12*numOfPose,1,CV_64F);
+        Mat out;
+        solve(M,b,out,DECOMP_NORMAL);
+    }
+    else{
+        //camera-base is known and assume scale factor is known
+        //estimate Ra, ta: using graycode
+        Mat Ra, ta;
         vector<Mat> captured_patterns;
         Mat blackImage, whiteImage;
         capturePatterns(capture, pattern, captured_patterns, blackImage, whiteImage);
-        ProjectorLocalizer::estimateCameraProjectorPose(captured_patterns, CAMERA_WIDTH, CAMERA_HEIGHT, blackImage, whiteImage, 
-                                       cam1intrinsics, cam1distCoeffs, prointrinsics, Ra, ua);
+        ProjectorLocalizer::estimateCameraProjectorPose(captured_patterns, CAMERA_WIDTH, CAMERA_HEIGHT, blackImage, whiteImage,
+                                       cam1intrinsics, cam1distCoeffs, prointrinsics, Ra, ta);
         //read in Robot Hand-Base transformation : Rb,tb
         Mat Rb, tb;
-        //update linear system to solve
-        composeLinearSystem(Ra,ua,Rb,tb,M, pose+1);
+        Mat Rz, tz;
+        Mat Rx = Ra.t()*(Rz*Rb);
+        Mat tx = Ra.t()*(Rz*tb + tz - ta);
     }
-    //solve for R_x,t_x,R_z,t_z:
-    Mat b = Mat::zeros(12*numOfPose,1,CV_64F);
-    Mat out;
-    solve(M,b,out,DECOMP_NORMAL);
     // the camera will be deinitialized automatically in VideoCapture destructor
     return 0;
 }

@@ -2,7 +2,7 @@
 #include <opencv2/calib3d.hpp>
 #include <iostream>
 #include <stdexcept>
-
+#include <string>
 using namespace std;
 using namespace cv;
 
@@ -37,7 +37,7 @@ vector<Mat> generatePatterns(size_t width, size_t height) {
 }
     
 const unsigned int DEFAULT_BLACK_THRESHOLD = 40;  // 3D_underworld default value
-const unsigned int DEFAULT_WHITE_THRESHOLD = 5;   // 3D_underworld default value
+const unsigned int DEFAULT_WHITE_THRESHOLD = 5;   // 5 3D_underworld default value
 
 // Computes the required number of pattern images
 void computeNumberOfImages(size_t width, size_t height, size_t& numOfColImgs, size_t& numOfRowImgs, size_t& numOfPatternImages)
@@ -175,6 +175,18 @@ void decode( vector<Mat> patternImages, const Mat& blackImage, const Mat& whiteI
     vector<Point> camPixels;
     vector<Point> projPixels;
     camPixels.resize( cam_height * cam_width );
+    //for drawing:
+
+    // then put the text itself
+    char text[80];
+    int fontFace = FONT_HERSHEY_SCRIPT_SIMPLEX;
+    double fontScale = 2;
+    int thickness = 3;
+    int baseline=0;
+    Size textSize = getTextSize(text, fontFace,
+                                fontScale, thickness, &baseline);
+    baseline += thickness;
+
     for( int i = 0; i < cam_width; i++ )
     {
         for( int j = 0; j < cam_height; j++ )
@@ -192,10 +204,16 @@ void decode( vector<Mat> patternImages, const Mat& blackImage, const Mat& whiteI
             else{
                 camPixels.push_back( Point( i, j ) );
                 projPixels.push_back(projPixel);
+                Point textOrg( i,j);
+                //display correspondences:
+                sprintf(text, "(%d,%d)", i, j);
+                putText(whiteImage, string(text) , textOrg, fontFace, fontScale,
+                        Scalar::all(255), thickness, 8);
             }
           }
         }
     }
+
     Mat F = findFundamentalMat(camPixels, projPixels, FM_RANSAC, 3, 0.99);
     Mat E = Kp.t()*F*Kc;
     //Perfrom SVD on E
@@ -262,6 +280,7 @@ void estimateCameraProjectorPose(const vector<Mat>& captured_patterns,
     remap( blackImage, blackImage, map1x, map1y, INTER_NEAREST, BORDER_CONSTANT, Scalar() );
     remap( whiteImage, whiteImage, map1x, map1y, INTER_NEAREST, BORDER_CONSTANT, Scalar() );
     ProjectorLocalizer::decode(captured_patterns, blackImage, whiteImage, Kp, Kc, Ra, ua);
+
 }
 
 }

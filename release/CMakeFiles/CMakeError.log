@@ -1,19 +1,19 @@
 Determining if the Q_WS_WIN exist failed with the following output:
 Change Dir: /home/duy/pico-projector/release/CMakeFiles/CMakeTmp
 
-Run Build Command:/usr/bin/make "cmTryCompileExec1917919390/fast"
-/usr/bin/make -f CMakeFiles/cmTryCompileExec1917919390.dir/build.make CMakeFiles/cmTryCompileExec1917919390.dir/build
+Run Build Command:/usr/bin/make "cmTryCompileExec2231375591/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec2231375591.dir/build.make CMakeFiles/cmTryCompileExec2231375591.dir/build
 make[1]: Entering directory `/home/duy/pico-projector/release/CMakeFiles/CMakeTmp'
 /usr/bin/cmake -E cmake_progress_report /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CMakeFiles 1
-Building CXX object CMakeFiles/cmTryCompileExec1917919390.dir/CheckSymbolExists.cxx.o
-/usr/bin/c++    -I/usr/include/qt4    -o CMakeFiles/cmTryCompileExec1917919390.dir/CheckSymbolExists.cxx.o -c /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+Building CXX object CMakeFiles/cmTryCompileExec2231375591.dir/CheckSymbolExists.cxx.o
+/usr/bin/c++    -I/usr/include/qt4    -o CMakeFiles/cmTryCompileExec2231375591.dir/CheckSymbolExists.cxx.o -c /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
 /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx: In function ‘int main(int, char**)’:
 /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:8:19: error: ‘Q_WS_WIN’ was not declared in this scope
    return ((int*)(&Q_WS_WIN))[argc];
                    ^
-make[1]: *** [CMakeFiles/cmTryCompileExec1917919390.dir/CheckSymbolExists.cxx.o] Error 1
+make[1]: *** [CMakeFiles/cmTryCompileExec2231375591.dir/CheckSymbolExists.cxx.o] Error 1
 make[1]: Leaving directory `/home/duy/pico-projector/release/CMakeFiles/CMakeTmp'
-make: *** [cmTryCompileExec1917919390/fast] Error 2
+make: *** [cmTryCompileExec2231375591/fast] Error 2
 
 File /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:
 /* */
@@ -33,19 +33,19 @@ int main(int argc, char** argv)
 Determining if the Q_WS_QWS exist failed with the following output:
 Change Dir: /home/duy/pico-projector/release/CMakeFiles/CMakeTmp
 
-Run Build Command:/usr/bin/make "cmTryCompileExec3380657222/fast"
-/usr/bin/make -f CMakeFiles/cmTryCompileExec3380657222.dir/build.make CMakeFiles/cmTryCompileExec3380657222.dir/build
+Run Build Command:/usr/bin/make "cmTryCompileExec3664896442/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec3664896442.dir/build.make CMakeFiles/cmTryCompileExec3664896442.dir/build
 make[1]: Entering directory `/home/duy/pico-projector/release/CMakeFiles/CMakeTmp'
 /usr/bin/cmake -E cmake_progress_report /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CMakeFiles 1
-Building CXX object CMakeFiles/cmTryCompileExec3380657222.dir/CheckSymbolExists.cxx.o
-/usr/bin/c++    -I/usr/include/qt4    -o CMakeFiles/cmTryCompileExec3380657222.dir/CheckSymbolExists.cxx.o -c /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+Building CXX object CMakeFiles/cmTryCompileExec3664896442.dir/CheckSymbolExists.cxx.o
+/usr/bin/c++    -I/usr/include/qt4    -o CMakeFiles/cmTryCompileExec3664896442.dir/CheckSymbolExists.cxx.o -c /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
 /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx: In function ‘int main(int, char**)’:
 /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:8:19: error: ‘Q_WS_QWS’ was not declared in this scope
    return ((int*)(&Q_WS_QWS))[argc];
                    ^
-make[1]: *** [CMakeFiles/cmTryCompileExec3380657222.dir/CheckSymbolExists.cxx.o] Error 1
+make[1]: *** [CMakeFiles/cmTryCompileExec3664896442.dir/CheckSymbolExists.cxx.o] Error 1
 make[1]: Leaving directory `/home/duy/pico-projector/release/CMakeFiles/CMakeTmp'
-make: *** [cmTryCompileExec3380657222/fast] Error 2
+make: *** [cmTryCompileExec3664896442/fast] Error 2
 
 File /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:
 /* */
@@ -65,19 +65,19 @@ int main(int argc, char** argv)
 Determining if the Q_WS_MAC exist failed with the following output:
 Change Dir: /home/duy/pico-projector/release/CMakeFiles/CMakeTmp
 
-Run Build Command:/usr/bin/make "cmTryCompileExec2286523377/fast"
-/usr/bin/make -f CMakeFiles/cmTryCompileExec2286523377.dir/build.make CMakeFiles/cmTryCompileExec2286523377.dir/build
+Run Build Command:/usr/bin/make "cmTryCompileExec1639504806/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec1639504806.dir/build.make CMakeFiles/cmTryCompileExec1639504806.dir/build
 make[1]: Entering directory `/home/duy/pico-projector/release/CMakeFiles/CMakeTmp'
 /usr/bin/cmake -E cmake_progress_report /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CMakeFiles 1
-Building CXX object CMakeFiles/cmTryCompileExec2286523377.dir/CheckSymbolExists.cxx.o
-/usr/bin/c++    -I/usr/include/qt4    -o CMakeFiles/cmTryCompileExec2286523377.dir/CheckSymbolExists.cxx.o -c /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+Building CXX object CMakeFiles/cmTryCompileExec1639504806.dir/CheckSymbolExists.cxx.o
+/usr/bin/c++    -I/usr/include/qt4    -o CMakeFiles/cmTryCompileExec1639504806.dir/CheckSymbolExists.cxx.o -c /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
 /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx: In function ‘int main(int, char**)’:
 /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:8:19: error: ‘Q_WS_MAC’ was not declared in this scope
    return ((int*)(&Q_WS_MAC))[argc];
                    ^
-make[1]: *** [CMakeFiles/cmTryCompileExec2286523377.dir/CheckSymbolExists.cxx.o] Error 1
+make[1]: *** [CMakeFiles/cmTryCompileExec1639504806.dir/CheckSymbolExists.cxx.o] Error 1
 make[1]: Leaving directory `/home/duy/pico-projector/release/CMakeFiles/CMakeTmp'
-make: *** [cmTryCompileExec2286523377/fast] Error 2
+make: *** [cmTryCompileExec1639504806/fast] Error 2
 
 File /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:
 /* */
