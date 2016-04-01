@@ -213,6 +213,11 @@ void decode( vector<Mat> patternImages, const Mat& blackImage, const Mat& whiteI
           }
         }
     }
+    //show correspondences:
+    cvNamedWindow("Correspondences");
+    resizeWindow( "Correspondences", 640, 480 );
+    imshow( "Correspondences", whiteImage );
+    waitKey(0);
 
     Mat F = findFundamentalMat(camPixels, projPixels, FM_RANSAC, 3, 0.99);
     Mat E = Kp.t()*F*Kc;
