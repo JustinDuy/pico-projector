@@ -7,12 +7,30 @@ using namespace std;
 using namespace cv;
 
 namespace ProjectorLocalizer {
-    
+
+// Generates the images needed for shadowMasks computation
+void getImagesForShadowMasks( int _w, int _h, Mat& blackImage, Mat& whiteImage)
+{
+    blackImage = Mat( _h, _w, CV_8UC3, Scalar( 0, 0, 0 ) );
+    whiteImage = Mat( _h, _w, CV_8UC3, Scalar( 255, 255, 255 ) );
+}
+const unsigned int DEFAULT_BLACK_THRESHOLD = 40;  // 3D_underworld default value
+const unsigned int DEFAULT_WHITE_THRESHOLD = 5;   // 5 3D_underworld default value
+
+// Computes the required number of pattern images
+void computeNumberOfImages(size_t width, size_t height, size_t& numOfColImgs, size_t& numOfRowImgs, size_t& numOfPatternImages)
+{
+    numOfColImgs = ( size_t ) ceil( log( double( width ) ) / log( 2.0 ) );
+    numOfRowImgs = ( size_t ) ceil( log( double( height ) ) / log( 2.0 ) );
+    numOfPatternImages = 2 * numOfColImgs + 2 * numOfRowImgs;
+}
+
 vector<Mat> generatePatterns(size_t width, size_t height) {
-    structured_light::GrayCodePattern::Params params;
+    /*structured_light::GrayCodePattern::Params params;
 
     params.width = width;
     params.height = height;
+    cout << "CAM (W,H) = " << width << "," << height << endl;
     if( params.width < 1 || params.height < 1 )
     {
       throw runtime_error("Invalid width or height");
@@ -34,19 +52,107 @@ vector<Mat> generatePatterns(size_t width, size_t height) {
     pattern.push_back ( white );
     
     return pattern;
-}
-    
-const unsigned int DEFAULT_BLACK_THRESHOLD = 40;  // 3D_underworld default value
-const unsigned int DEFAULT_WHITE_THRESHOLD = 5;   // 5 3D_underworld default value
+    */
 
-// Computes the required number of pattern images
-void computeNumberOfImages(size_t width, size_t height, size_t& numOfColImgs, size_t& numOfRowImgs, size_t& numOfPatternImages)
-{
-  numOfColImgs = ( size_t ) ceil( log( double( width ) ) / log( 2.0 ) );
-  numOfRowImgs = ( size_t ) ceil( log( double( height ) ) / log( 2.0 ) );
-  numOfPatternImages = 2 * numOfColImgs + 2 * numOfRowImgs;
-}
+    structured_light::GrayCodePattern::Params params;
+    params.width = width;
+    params.height = height;
+    // The number of images of the pattern
+    size_t numOfPatternImages ;
+    // The number of row images of the pattern
+    size_t numOfRowImgs;
+    // The number of column images of the pattern
+    size_t numOfColImgs;
+    computeNumberOfImages(width, height, numOfColImgs, numOfRowImgs, numOfPatternImages);
 
+    // Storage for pattern
+    vector<Mat> pattern_;
+    pattern_.resize( numOfPatternImages );
+
+    for( size_t i = 0; i < numOfPatternImages; i++ )
+    {
+        pattern_[i] = Mat( params.height, params.width, CV_8U );
+    }
+
+    uchar flag = 0;
+
+    for( int j = 0; j < params.width; j++ )  // rows loop
+    {
+        int rem = 0, num = j, prevRem = j % 2;
+
+        for( size_t k = 0; k < numOfColImgs; k++ )  // images loop
+        {
+            num = num / 2;
+            rem = num % 2;
+
+            if( ( rem == 0 && prevRem == 1 ) || ( rem == 1 && prevRem == 0) )
+            {
+                flag = 1;
+            }
+            else
+            {
+                flag = 0;
+            }
+
+            for( int i = 0; i < params.height; i++ )  // rows loop
+            {
+
+                uchar pixel_color = ( uchar ) flag * 255;
+
+                pattern_[2 * numOfColImgs - 2 * k - 2].at<uchar>( i, j ) = pixel_color;
+                if( pixel_color > 0 )
+                    pixel_color = ( uchar ) 0;
+                else
+                    pixel_color = ( uchar ) 255;
+                pattern_[2 * numOfColImgs - 2 * k - 1].at<uchar>( i, j ) = pixel_color;  // inverse
+            }
+
+            prevRem = rem;
+        }
+    }
+
+    for( int i = 0; i < params.height; i++ )  // rows loop
+    {
+        int rem = 0, num = i, prevRem = i % 2;
+
+        for( size_t k = 0; k < numOfRowImgs; k++ )
+        {
+            num = num / 2;
+            rem = num % 2;
+
+            if( (rem == 0 && prevRem == 1) || (rem == 1 && prevRem == 0) )
+            {
+                flag = 1;
+            }
+            else
+            {
+                flag = 0;
+            }
+
+            for( int j = 0; j < params.width; j++ )
+            {
+                uchar pixel_color = ( uchar ) flag * 255;
+                pattern_[2 * numOfRowImgs - 2 * k + 2 * numOfColImgs - 2].at<uchar>( i, j ) = pixel_color;
+
+                if( pixel_color > 0 )
+                    pixel_color = ( uchar ) 0;
+                else
+                    pixel_color = ( uchar ) 255;
+
+                pattern_[2 * numOfRowImgs - 2 * k + 2 * numOfColImgs - 1].at<uchar>( i, j ) = pixel_color;
+            }
+
+            prevRem = rem;
+        }
+    }
+    // Generate the all-white and all-black images needed for shadows mask computation
+    Mat white;
+    Mat black;
+    getImagesForShadowMasks( params.width, params.height, black, white );
+    pattern_.push_back ( black );
+    pattern_.push_back ( white );
+    return pattern_;
+}
 // Computes the shadows occlusion where we cannot reconstruct the model
 void computeShadowMask( const Mat blackImage,const Mat whiteImage, double blackThreshold, Mat& shadowMask)
 {
@@ -108,7 +214,7 @@ bool getProjPixel( const vector<Mat>& patternImages, int x, int y, Point &projPi
   
   size_t numOfColImgs, numOfRowImgs, numOfPatternImages;
   computeNumberOfImages(width, height, numOfColImgs, numOfRowImgs, numOfPatternImages);
-
+  cout << "Num. of col images " << numOfColImgs << endl;
   // process column images
   for( size_t count = 0; count < numOfColImgs; count++ )
   {
@@ -128,7 +234,7 @@ bool getProjPixel( const vector<Mat>& patternImages, int x, int y, Point &projPi
   }
 
   xDec = grayToDec( grayCol );
-
+  cout << "Num. of row images " << numOfRowImgs << endl;
   // process row images
   for( size_t count = 0; count < numOfRowImgs; count++ )
   {
@@ -169,7 +275,7 @@ void decode( vector<Mat> patternImages, const Mat& blackImage, const Mat& whiteI
     computeShadowMask( blackImage, whiteImage, DEFAULT_BLACK_THRESHOLD, shadowMask );
     int cam_width = patternImages[0].cols;
     int cam_height = patternImages[0].rows;
-
+    cout << "CAM WIDTH, HEIGHT = " << cam_width << "," << cam_height <<endl;
     Point projPixel;
     // Storage for the pixels of the camera that correspond to the same pixel of the projector
     vector<Point> camPixels;
@@ -180,8 +286,8 @@ void decode( vector<Mat> patternImages, const Mat& blackImage, const Mat& whiteI
     // then put the text itself
     char text[80];
     int fontFace = FONT_HERSHEY_SCRIPT_SIMPLEX;
-    double fontScale = 2;
-    int thickness = 3;
+    double fontScale = 1;
+    int thickness = 1;
     int baseline=0;
     Size textSize = getTextSize(text, fontFace,
                                 fontScale, thickness, &baseline);
@@ -204,14 +310,18 @@ void decode( vector<Mat> patternImages, const Mat& blackImage, const Mat& whiteI
             else{
                 camPixels.push_back( Point( i, j ) );
                 projPixels.push_back(projPixel);
-                Point textOrg( i,j);
+                //Point textOrg( i,j);
+                circle(whiteImage,Point(i ,j), 1, (0,0,255), 0);
                 //display correspondences:
-                sprintf(text, "(%d,%d)", i, j);
-                putText(whiteImage, string(text) , textOrg, fontFace, fontScale,
-                        Scalar::all(255), thickness, 8);
+                //sprintf(text, "(%f,%f)", projPixel.x, projPixel.y);
+                //cout << text <<",";
+                //putText(whiteImage, string(text) , textOrg, fontFace, fontScale,
+                //        Scalar::all(255), thickness, 3);
             }
           }
         }
+        cout << endl;
+
     }
     //show correspondences:
     cvNamedWindow("Correspondences");

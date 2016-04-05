@@ -29,21 +29,21 @@ void kroneckerProduct(const Mat& a, const Mat& b, Mat& product);
 void composeLinearSystem(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat& tb, Mat& M, int poseNum );
 void capturePatterns(VideoCapture& capture, const vector<Mat>& pattern, vector<Mat>& captured_patterns, Mat& black_image, Mat& white_image);
 
-String captured_path = "captured/";
+String captured_path = "../captured/";
 
 int main( int argc, char** argv )
 {
     QApplication a(argc, argv);
     
     //load Kinect calibration file
-    FileStorage fs( "data/rgb_A00363813595051A.yaml", FileStorage::READ );
+    FileStorage fs( "../data/rgb_A00363813595051A.yaml", FileStorage::READ );
     if( !fs.isOpened() )
     {
       cout << "Failed to open Camera Calibration Data File." << endl;
       help();
       return -1;
     }
-    FileStorage fs2( "data/calibration.yml", FileStorage::READ);
+    FileStorage fs2( "../data/calibration.yml", FileStorage::READ);
     if( !fs2.isOpened()){
         cout << "Failed to open Projector Calibration Data File." << endl;
     }
@@ -62,22 +62,20 @@ int main( int argc, char** argv )
     if((!cam1intrinsics.data) || (!cam1distCoeffs.data) || (!prointrinsics.data))
     {
       cout << "Failed to load camera/projector calibration parameters" << endl;
-      help();
       return -1;
     }
     
-    const size_t CAMERA_WIDTH = 1280;   
-    const size_t CAMERA_HEIGHT = 720;   
+    const size_t CAMERA_WIDTH = 640;//1280
+    const size_t CAMERA_HEIGHT = 480;//720
     vector<Mat> pattern = ProjectorLocalizer::generatePatterns(CAMERA_WIDTH, CAMERA_HEIGHT);
 
-    namedWindow( "cam1", WINDOW_NORMAL );
-    resizeWindow( "cam1", 640, 480 );
-    //resizeWindow("cam1", params.width, params.height);
+    //namedWindow( "cam1", WINDOW_NORMAL );
+    //resizeWindow( "cam1", 640, 480 );
 
     // Setting pattern window on second monitor (the projector's one)
     namedWindow( "Pattern Window", WINDOW_NORMAL );
     resizeWindow( "Pattern Window", CAMERA_WIDTH, CAMERA_HEIGHT );
-    moveWindow( "Pattern Window", CAMERA_WIDTH + 316, -20 );
+    moveWindow( "Pattern Window", CAMERA_WIDTH + 1000, 50 );
     setWindowProperty( "Pattern Window", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN );
 
     // Open kinect rgb cam, using openni
@@ -127,7 +125,8 @@ int main( int argc, char** argv )
         vector<Mat> captured_patterns;
         Mat blackImage, whiteImage;
         capturePatterns(capture, pattern, captured_patterns, blackImage, whiteImage);
-        ProjectorLocalizer::estimateCameraProjectorPose(captured_patterns, CAMERA_WIDTH, CAMERA_HEIGHT, blackImage, whiteImage,
+        ProjectorLocalizer::estimateCameraProjectorPose(captured_patterns, CAMERA_WIDTH, CAMERA_HEIGHT,
+                                       blackImage, whiteImage,
                                        cam1intrinsics, cam1distCoeffs, prointrinsics, Ra, ta);
         //read in Robot Hand-Base transformation : Rb,tb
         Mat Rb, tb;
@@ -225,44 +224,44 @@ void capturePatterns(VideoCapture& capture, const vector<Mat>& pattern, vector<M
     {
       cout << "Waiting to save image number " << i + 1 << endl << "Press any key to acquire the photo" << endl;
       imshow( "Pattern Window", pattern[i] );
+      waitKey( 200 );
+
       Mat frame1;
       capture.grab();
       //capture.retrieve( depthMap, CV_CAP_OPENNI_DEPTH_MAP );
       capture.retrieve( frame1, CV_CAP_OPENNI_BGR_IMAGE );
 
-      if( frame1.data )
+      if(frame1.data ) //key == 10  &&
       {
         Mat tmp;
-        cout << "Kinect rgb cam  size: " << Size( ( int ) capture.get( CV_CAP_PROP_FRAME_WIDTH ), ( int ) capture.get( CV_CAP_PROP_FRAME_HEIGHT ) )
-             << endl;
-        cout << "focus kinect rgb cam: " << capture.get( CV_CAP_PROP_OPENNI_FOCAL_LENGTH  ) << endl ;
-        cout << "Press enter to save the photo or an other key to re-acquire the photo" << endl;
+        //cout << "Kinect rgb cam  size: " << Size( ( int ) capture.get( CV_CAP_PROP_FRAME_WIDTH ), ( int ) capture.get( CV_CAP_PROP_FRAME_HEIGHT ) )
+        //     << endl;
+        //cout << "focus kinect rgb cam: " << capture.get( CV_CAP_PROP_OPENNI_FOCAL_LENGTH  ) << endl ;
+        //cout << "Press enter to save the photo or an other key to re-acquire the photo" << endl;
 
         // Resizing images to avoid issues for high resolution images, visualizing them as grayscale
         resize( frame1, tmp, Size( 640, 480 ) );
         cvtColor( tmp, tmp, COLOR_RGB2GRAY );
-        imshow( "cam1", tmp );
+        //imshow( "cam1", tmp );
         bool save1 = false;
-
-
-        int key = waitKey( 0 );
+        //int key = waitKey( 0 );
         // Pressing enter, it saves the output
-        if( key == 10 )
-        {
+        //if( key == 10 )
+        //{
           ostringstream name;
           name << i + 1;
-          save1 = imwrite( captured_path + "pattern_cam1_im" + name.str() + ".png", frame1 );
+          save1 = imwrite( captured_path + "im" + name.str() + ".png", frame1 );
           if( save1 )
           {
-            cout << "pattern cam1 images number " << i + 1 << " saved" << endl << endl;
+            cout << "pattern cam1 images number " << i + 1 << " saved" << endl ;
             if(i < pattern.size() - 2) {
                 captured_patterns.push_back(frame1);
             }
             else if(i == pattern.size() -2){
-                white_image = frame1.clone();
+                black_image = frame1.clone();
             }
             else if(i == pattern.size() -1){
-                black_image = frame1.clone();
+                white_image = frame1.clone();
             }
             i++;
           }
@@ -270,12 +269,12 @@ void capturePatterns(VideoCapture& capture, const vector<Mat>& pattern, vector<M
           {
             cout << "pattern cam1 images number " << i + 1 << " NOT saved" << endl << endl << "Retry, check the path"<< endl << endl;
           }
-        }
+        //}
         // Pressing escape, the program closes
-        if( key == 27 )
-        {
-          cout << "Closing program" << endl;
-        }
+        //if( key == 27 )
+        //{
+        //  cout << "Closing program" << endl;
+        //}
       }
       else
       {
