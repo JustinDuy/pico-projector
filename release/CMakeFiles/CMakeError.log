@@ -1,19 +1,19 @@
 Determining if the Q_WS_WIN exist failed with the following output:
 Change Dir: /home/duy/pico-projector/release/CMakeFiles/CMakeTmp
 
-Run Build Command:/usr/bin/make "cmTryCompileExec3682180680/fast"
-/usr/bin/make -f CMakeFiles/cmTryCompileExec3682180680.dir/build.make CMakeFiles/cmTryCompileExec3682180680.dir/build
+Run Build Command:/usr/bin/make "cmTryCompileExec1016914554/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec1016914554.dir/build.make CMakeFiles/cmTryCompileExec1016914554.dir/build
 make[1]: Entering directory `/home/duy/pico-projector/release/CMakeFiles/CMakeTmp'
 /usr/bin/cmake -E cmake_progress_report /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CMakeFiles 1
-Building CXX object CMakeFiles/cmTryCompileExec3682180680.dir/CheckSymbolExists.cxx.o
-/usr/bin/c++    -I/usr/include/qt4    -o CMakeFiles/cmTryCompileExec3682180680.dir/CheckSymbolExists.cxx.o -c /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+Building CXX object CMakeFiles/cmTryCompileExec1016914554.dir/CheckSymbolExists.cxx.o
+/usr/bin/c++    -I/usr/include/qt4    -o CMakeFiles/cmTryCompileExec1016914554.dir/CheckSymbolExists.cxx.o -c /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+make[1]: Leaving directory `/home/duy/pico-projector/release/CMakeFiles/CMakeTmp'
 /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx: In function ‘int main(int, char**)’:
 /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:8:19: error: ‘Q_WS_WIN’ was not declared in this scope
    return ((int*)(&Q_WS_WIN))[argc];
                    ^
-make[1]: *** [CMakeFiles/cmTryCompileExec3682180680.dir/CheckSymbolExists.cxx.o] Error 1
-make[1]: Leaving directory `/home/duy/pico-projector/release/CMakeFiles/CMakeTmp'
-make: *** [cmTryCompileExec3682180680/fast] Error 2
+make[1]: *** [CMakeFiles/cmTryCompileExec1016914554.dir/CheckSymbolExists.cxx.o] Error 1
+make: *** [cmTryCompileExec1016914554/fast] Error 2
 
 File /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:
 /* */
@@ -33,19 +33,19 @@ int main(int argc, char** argv)
 Determining if the Q_WS_QWS exist failed with the following output:
 Change Dir: /home/duy/pico-projector/release/CMakeFiles/CMakeTmp
 
-Run Build Command:/usr/bin/make "cmTryCompileExec2747202702/fast"
-/usr/bin/make -f CMakeFiles/cmTryCompileExec2747202702.dir/build.make CMakeFiles/cmTryCompileExec2747202702.dir/build
+Run Build Command:/usr/bin/make "cmTryCompileExec3310469277/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec3310469277.dir/build.make CMakeFiles/cmTryCompileExec3310469277.dir/build
 make[1]: Entering directory `/home/duy/pico-projector/release/CMakeFiles/CMakeTmp'
 /usr/bin/cmake -E cmake_progress_report /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CMakeFiles 1
-Building CXX object CMakeFiles/cmTryCompileExec2747202702.dir/CheckSymbolExists.cxx.o
-/usr/bin/c++    -I/usr/include/qt4    -o CMakeFiles/cmTryCompileExec2747202702.dir/CheckSymbolExists.cxx.o -c /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+Building CXX object CMakeFiles/cmTryCompileExec3310469277.dir/CheckSymbolExists.cxx.o
+/usr/bin/c++    -I/usr/include/qt4    -o CMakeFiles/cmTryCompileExec3310469277.dir/CheckSymbolExists.cxx.o -c /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
 /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx: In function ‘int main(int, char**)’:
 /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:8:19: error: ‘Q_WS_QWS’ was not declared in this scope
    return ((int*)(&Q_WS_QWS))[argc];
                    ^
-make[1]: *** [CMakeFiles/cmTryCompileExec2747202702.dir/CheckSymbolExists.cxx.o] Error 1
+make[1]: *** [CMakeFiles/cmTryCompileExec3310469277.dir/CheckSymbolExists.cxx.o] Error 1
 make[1]: Leaving directory `/home/duy/pico-projector/release/CMakeFiles/CMakeTmp'
-make: *** [cmTryCompileExec2747202702/fast] Error 2
+make: *** [cmTryCompileExec3310469277/fast] Error 2
 
 File /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:
 /* */
@@ -65,19 +65,19 @@ int main(int argc, char** argv)
 Determining if the Q_WS_MAC exist failed with the following output:
 Change Dir: /home/duy/pico-projector/release/CMakeFiles/CMakeTmp
 
-Run Build Command:/usr/bin/make "cmTryCompileExec3010808636/fast"
-/usr/bin/make -f CMakeFiles/cmTryCompileExec3010808636.dir/build.make CMakeFiles/cmTryCompileExec3010808636.dir/build
+Run Build Command:/usr/bin/make "cmTryCompileExec533403093/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec533403093.dir/build.make CMakeFiles/cmTryCompileExec533403093.dir/build
 make[1]: Entering directory `/home/duy/pico-projector/release/CMakeFiles/CMakeTmp'
 /usr/bin/cmake -E cmake_progress_report /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CMakeFiles 1
-Building CXX object CMakeFiles/cmTryCompileExec3010808636.dir/CheckSymbolExists.cxx.o
-/usr/bin/c++    -I/usr/include/qt4    -o CMakeFiles/cmTryCompileExec3010808636.dir/CheckSymbolExists.cxx.o -c /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+Building CXX object CMakeFiles/cmTryCompileExec533403093.dir/CheckSymbolExists.cxx.o
+/usr/bin/c++    -I/usr/include/qt4    -o CMakeFiles/cmTryCompileExec533403093.dir/CheckSymbolExists.cxx.o -c /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
 /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx: In function ‘int main(int, char**)’:
 /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:8:19: error: ‘Q_WS_MAC’ was not declared in this scope
    return ((int*)(&Q_WS_MAC))[argc];
                    ^
-make[1]: *** [CMakeFiles/cmTryCompileExec3010808636.dir/CheckSymbolExists.cxx.o] Error 1
+make[1]: *** [CMakeFiles/cmTryCompileExec533403093.dir/CheckSymbolExists.cxx.o] Error 1
 make[1]: Leaving directory `/home/duy/pico-projector/release/CMakeFiles/CMakeTmp'
-make: *** [cmTryCompileExec3010808636/fast] Error 2
+make: *** [cmTryCompileExec533403093/fast] Error 2
 
 File /home/duy/pico-projector/release/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:
 /* */

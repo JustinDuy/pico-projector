@@ -21,7 +21,7 @@ void estimateCameraProjectorPose(const std::vector<cv::Mat>& captured_patterns,
                                     cv::Mat& ua);
     
 
-
+int getPatternImageNum(int width, int height);
 }
 
 #endif // GRAYCODEDECODER_H

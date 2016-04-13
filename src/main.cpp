@@ -11,7 +11,7 @@
 #include <opencv2/structured_light.hpp>
 
 #include <iostream>
-
+//#define ___DEBUG 1
 using namespace cv;
 using namespace std;
 void project(Mat img);
@@ -28,7 +28,7 @@ void kroneckerProduct(const Mat& a, const Mat& b, Mat& product);
 
 void composeLinearSystem(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat& tb, Mat& M, int poseNum );
 void capturePatterns(VideoCapture& capture, const vector<Mat>& pattern, vector<Mat>& captured_patterns, Mat& black_image, Mat& white_image);
-
+void loadTestPatterns(int width, int height, const char* path, vector<Mat>& captured_patterns, Mat& black_image, Mat& white_image);
 String captured_path = "../captured/";
 
 int main( int argc, char** argv )
@@ -74,10 +74,10 @@ int main( int argc, char** argv )
 
     // Setting pattern window on second monitor (the projector's one)
     namedWindow( "Pattern Window", WINDOW_NORMAL );
-    resizeWindow( "Pattern Window", CAMERA_WIDTH, CAMERA_HEIGHT );
+    resizeWindow( "Pattern Window", CAMERA_WIDTH*2, CAMERA_HEIGHT*2 );
     moveWindow( "Pattern Window", CAMERA_WIDTH + 1000, 50 );
-    setWindowProperty( "Pattern Window", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN );
-
+    //setWindowProperty( "Pattern Window", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN );
+#ifndef ___DEBUG
     // Open kinect rgb cam, using openni
     VideoCapture capture( CV_CAP_OPENNI );
     if( !capture.isOpened() )
@@ -87,6 +87,7 @@ int main( int argc, char** argv )
       help();
       return -1;
     }
+#endif
     bool known_Z = true;
     if(!known_Z){
         //Camera-base is not known
@@ -105,7 +106,9 @@ int main( int argc, char** argv )
             Mat Ra, ua;
             vector<Mat> captured_patterns;
             Mat blackImage, whiteImage;
+#ifndef ___DEBUG
             capturePatterns(capture, pattern, captured_patterns, blackImage, whiteImage);
+#endif
             ProjectorLocalizer::estimateCameraProjectorPose(captured_patterns, CAMERA_WIDTH, CAMERA_HEIGHT, blackImage, whiteImage,
                                            cam1intrinsics, cam1distCoeffs, prointrinsics, Ra, ua);
             //read in Robot Hand-Base transformation : Rb,tb
@@ -124,7 +127,14 @@ int main( int argc, char** argv )
         Mat Ra, ta;
         vector<Mat> captured_patterns;
         Mat blackImage, whiteImage;
+#ifndef ___DEBUG
         capturePatterns(capture, pattern, captured_patterns, blackImage, whiteImage);
+#endif
+
+#ifdef  ___DEBUG
+        loadTestPatterns(CAMERA_WIDTH,CAMERA_HEIGHT, "captured_640_480_2", captured_patterns, blackImage, whiteImage);
+#endif
+
         ProjectorLocalizer::estimateCameraProjectorPose(captured_patterns, CAMERA_WIDTH, CAMERA_HEIGHT,
                                        blackImage, whiteImage,
                                        cam1intrinsics, cam1distCoeffs, prointrinsics, Ra, ta);
@@ -213,68 +223,77 @@ void kroneckerProduct(const Mat& a, const Mat& b, Mat& product)
         }
     }
 }
+void loadTestPatterns(int width, int height, const char* path, vector<Mat>& captured_patterns, Mat& black_image, Mat& white_image){
+    int nPatterns = ProjectorLocalizer::getPatternImageNum(width, height);
+    for(int i = 0 ; i < nPatterns + 2; i++)
+    {
+        char imgFile[50];
+        sprintf(imgFile,"../%s/im%d.png",path,i+1);
+        cout << "Reading in " << imgFile << endl;
+        Mat img = imread(imgFile, IMREAD_GRAYSCALE);
+        if(i < nPatterns )
+            captured_patterns.push_back(img);
+        else if(i == nPatterns )
+        {
+            black_image = img.clone();
+        }
+        else if(i == (nPatterns + 1))
+        {
+            white_image = img.clone();
+        }
+        //imshow("Read image ",img);
+        //waitKey(100);
+    }
+    //waitKey();
 
+}
 void capturePatterns(VideoCapture& capture, const vector<Mat>& pattern, vector<Mat>& captured_patterns, Mat& black_image, Mat& white_image) 
 {
-    //for captured images
-    Mat blackImage, whiteImage;
-
     int i =0;
     while( i < pattern.size() )
     {
-      cout << "Waiting to save image number " << i + 1 << endl << "Press any key to acquire the photo" << endl;
+      cout << "Waiting to save image number " << i + 1 << endl ;
       imshow( "Pattern Window", pattern[i] );
-      waitKey( 200 );
+      if(i==0)
+          waitKey(500);
+      else
+          waitKey(250);
 
       Mat frame1;
       capture.grab();
-      //capture.retrieve( depthMap, CV_CAP_OPENNI_DEPTH_MAP );
       capture.retrieve( frame1, CV_CAP_OPENNI_BGR_IMAGE );
 
-      if(frame1.data ) //key == 10  &&
+      if(frame1.data )
       {
-        Mat tmp;
-        //cout << "Kinect rgb cam  size: " << Size( ( int ) capture.get( CV_CAP_PROP_FRAME_WIDTH ), ( int ) capture.get( CV_CAP_PROP_FRAME_HEIGHT ) )
-        //     << endl;
-        //cout << "focus kinect rgb cam: " << capture.get( CV_CAP_PROP_OPENNI_FOCAL_LENGTH  ) << endl ;
-        //cout << "Press enter to save the photo or an other key to re-acquire the photo" << endl;
+        Mat gray;
 
         // Resizing images to avoid issues for high resolution images, visualizing them as grayscale
-        resize( frame1, tmp, Size( 640, 480 ) );
-        cvtColor( tmp, tmp, COLOR_RGB2GRAY );
-        //imshow( "cam1", tmp );
+        resize( frame1, gray, Size( 640, 480 ) );
+        cvtColor( gray, gray, COLOR_RGB2GRAY );
         bool save1 = false;
-        //int key = waitKey( 0 );
-        // Pressing enter, it saves the output
-        //if( key == 10 )
-        //{
-          ostringstream name;
-          name << i + 1;
-          save1 = imwrite( captured_path + "im" + name.str() + ".png", frame1 );
-          if( save1 )
-          {
-            cout << "pattern cam1 images number " << i + 1 << " saved" << endl ;
-            if(i < pattern.size() - 2) {
-                captured_patterns.push_back(frame1);
+
+        ostringstream name;
+        name << i + 1;
+        save1 = imwrite( captured_path + "im" + name.str() + ".png", frame1 );
+        if( save1 )
+        {
+            cout << "pattern camera image number " << i + 1 << " saved" << endl ;
+            if(i < pattern.size() - 2)
+            {
+                captured_patterns.push_back(gray);
             }
             else if(i == pattern.size() -2){
-                black_image = frame1.clone();
-            }
-            else if(i == pattern.size() -1){
-                white_image = frame1.clone();
-            }
-            i++;
-          }
-          else
-          {
+            black_image = gray.clone();
+        }
+        else if(i == pattern.size() -1){
+            white_image = gray.clone();
+        }
+        i++;
+        }
+        else
+        {
             cout << "pattern cam1 images number " << i + 1 << " NOT saved" << endl << endl << "Retry, check the path"<< endl << endl;
-          }
-        //}
-        // Pressing escape, the program closes
-        //if( key == 27 )
-        //{
-        //  cout << "Closing program" << endl;
-        //}
+        }
       }
       else
       {
