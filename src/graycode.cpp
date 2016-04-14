@@ -8,7 +8,7 @@ using namespace std;
 using namespace cv;
 
 namespace ProjectorLocalizer {
-
+void saveTransformation(const Mat& R1, const Mat& u1, string filename);
 // Generates the images needed for shadowMasks computation
 void getImagesForShadowMasks( int _w, int _h, Mat& blackImage, Mat& whiteImage)
 {
@@ -359,13 +359,26 @@ void decode( vector<Mat> patternImages, const Mat& blackImage, const Mat& whiteI
         cout << R1 << "," << u1 << endl;
         R = R1;//R2
         u = u1;
+        //save R1, u1 to "cam_proj_trans.yaml"
+        saveTransformation(R1, u1, "../data/cam_proj_trans.yaml");
     }
     else
     {
         cout << "corresspodence lists size mitmatched or not enough corresspondences" << endl;
     }
 }
+void saveTransformation(const Mat& R1, const Mat& u1, string filename)
+{
+    FileStorage fs(filename, FileStorage::WRITE);
+    if (!fs.isOpened())
+    {
+        cout << "Error saving Transformation to " << filename << endl;
+        return ;
+    }
 
+    fs << "R1" << R1 << "u1" << u1;
+    fs.release();
+}
 void estimateCameraProjectorPose(const vector<Mat>& captured_patterns, 
                                     int pro_width, 
                                     int pro_height, 

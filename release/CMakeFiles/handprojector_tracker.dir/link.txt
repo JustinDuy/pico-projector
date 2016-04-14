@@ -1,0 +1,2 @@
+/usr/bin/ar cr libhandprojector_tracker.a  CMakeFiles/handprojector_tracker.dir/src/graycode.cpp.o
+/usr/bin/ranlib libhandprojector_tracker.a

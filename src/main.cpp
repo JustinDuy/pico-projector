@@ -138,11 +138,16 @@ int main( int argc, char** argv )
         ProjectorLocalizer::estimateCameraProjectorPose(captured_patterns, CAMERA_WIDTH, CAMERA_HEIGHT,
                                        blackImage, whiteImage,
                                        cam1intrinsics, cam1distCoeffs, prointrinsics, Ra, ta);
+#ifndef __DEBUG
         //read in Robot Hand-Base transformation : Rb,tb
         Mat Rb, tb;
+        //read in Camera-Base transformation : Rz,tz
         Mat Rz, tz;
+
+        //compute Hand-Projector : Rx,tx
         Mat Rx = Ra.t()*(Rz*Rb);
         Mat tx = Ra.t()*(Rz*tb + tz - ta);
+#endif
     }
     // the camera will be deinitialized automatically in VideoCapture destructor
     return 0;

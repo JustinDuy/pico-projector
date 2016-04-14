@@ -116,7 +116,7 @@ CMAKE_OBJCOPY:FILEPATH=/usr/bin/objcopy
 CMAKE_OBJDUMP:FILEPATH=/usr/bin/objdump
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=handprojector_calibration
+CMAKE_PROJECT_NAME:STATIC=handprojector_tracker
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib
@@ -792,6 +792,15 @@ handprojector_calibration_LIB_DEPENDS:STATIC=
 
 //Value Computed by CMake
 handprojector_calibration_SOURCE_DIR:STATIC=/home/duy/pico-projector
+
+//Value Computed by CMake
+handprojector_tracker_BINARY_DIR:STATIC=/home/duy/pico-projector/release
+
+//Dependencies for target
+handprojector_tracker_LIB_DEPENDS:STATIC=
+
+//Value Computed by CMake
+handprojector_tracker_SOURCE_DIR:STATIC=/home/duy/pico-projector
 
 
 ########################

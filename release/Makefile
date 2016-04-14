@@ -143,37 +143,37 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named handprojector_calibration
+# Target rules for targets named handprojector_tracker
 
 # Build rule for target.
-handprojector_calibration: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 handprojector_calibration
-.PHONY : handprojector_calibration
+handprojector_tracker: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 handprojector_tracker
+.PHONY : handprojector_tracker
 
 # fast build rule for target.
-handprojector_calibration/fast:
-	$(MAKE) -f CMakeFiles/handprojector_calibration.dir/build.make CMakeFiles/handprojector_calibration.dir/build
-.PHONY : handprojector_calibration/fast
+handprojector_tracker/fast:
+	$(MAKE) -f CMakeFiles/handprojector_tracker.dir/build.make CMakeFiles/handprojector_tracker.dir/build
+.PHONY : handprojector_tracker/fast
 
 #=============================================================================
-# Target rules for targets named handprojector_calibration_main
+# Target rules for targets named handprojector_tracker_main
 
 # Build rule for target.
-handprojector_calibration_main: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 handprojector_calibration_main
-.PHONY : handprojector_calibration_main
+handprojector_tracker_main: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 handprojector_tracker_main
+.PHONY : handprojector_tracker_main
 
 # fast build rule for target.
-handprojector_calibration_main/fast:
-	$(MAKE) -f CMakeFiles/handprojector_calibration_main.dir/build.make CMakeFiles/handprojector_calibration_main.dir/build
-.PHONY : handprojector_calibration_main/fast
+handprojector_tracker_main/fast:
+	$(MAKE) -f CMakeFiles/handprojector_tracker_main.dir/build.make CMakeFiles/handprojector_tracker_main.dir/build
+.PHONY : handprojector_tracker_main/fast
 
 src/graycode.o: src/graycode.cpp.o
 .PHONY : src/graycode.o
 
 # target to build an object file
 src/graycode.cpp.o:
-	$(MAKE) -f CMakeFiles/handprojector_calibration.dir/build.make CMakeFiles/handprojector_calibration.dir/src/graycode.cpp.o
+	$(MAKE) -f CMakeFiles/handprojector_tracker.dir/build.make CMakeFiles/handprojector_tracker.dir/src/graycode.cpp.o
 .PHONY : src/graycode.cpp.o
 
 src/graycode.i: src/graycode.cpp.i
@@ -181,7 +181,7 @@ src/graycode.i: src/graycode.cpp.i
 
 # target to preprocess a source file
 src/graycode.cpp.i:
-	$(MAKE) -f CMakeFiles/handprojector_calibration.dir/build.make CMakeFiles/handprojector_calibration.dir/src/graycode.cpp.i
+	$(MAKE) -f CMakeFiles/handprojector_tracker.dir/build.make CMakeFiles/handprojector_tracker.dir/src/graycode.cpp.i
 .PHONY : src/graycode.cpp.i
 
 src/graycode.s: src/graycode.cpp.s
@@ -189,7 +189,7 @@ src/graycode.s: src/graycode.cpp.s
 
 # target to generate assembly for a file
 src/graycode.cpp.s:
-	$(MAKE) -f CMakeFiles/handprojector_calibration.dir/build.make CMakeFiles/handprojector_calibration.dir/src/graycode.cpp.s
+	$(MAKE) -f CMakeFiles/handprojector_tracker.dir/build.make CMakeFiles/handprojector_tracker.dir/src/graycode.cpp.s
 .PHONY : src/graycode.cpp.s
 
 src/main.o: src/main.cpp.o
@@ -197,7 +197,7 @@ src/main.o: src/main.cpp.o
 
 # target to build an object file
 src/main.cpp.o:
-	$(MAKE) -f CMakeFiles/handprojector_calibration_main.dir/build.make CMakeFiles/handprojector_calibration_main.dir/src/main.cpp.o
+	$(MAKE) -f CMakeFiles/handprojector_tracker_main.dir/build.make CMakeFiles/handprojector_tracker_main.dir/src/main.cpp.o
 .PHONY : src/main.cpp.o
 
 src/main.i: src/main.cpp.i
@@ -205,7 +205,7 @@ src/main.i: src/main.cpp.i
 
 # target to preprocess a source file
 src/main.cpp.i:
-	$(MAKE) -f CMakeFiles/handprojector_calibration_main.dir/build.make CMakeFiles/handprojector_calibration_main.dir/src/main.cpp.i
+	$(MAKE) -f CMakeFiles/handprojector_tracker_main.dir/build.make CMakeFiles/handprojector_tracker_main.dir/src/main.cpp.i
 .PHONY : src/main.cpp.i
 
 src/main.s: src/main.cpp.s
@@ -213,7 +213,7 @@ src/main.s: src/main.cpp.s
 
 # target to generate assembly for a file
 src/main.cpp.s:
-	$(MAKE) -f CMakeFiles/handprojector_calibration_main.dir/build.make CMakeFiles/handprojector_calibration_main.dir/src/main.cpp.s
+	$(MAKE) -f CMakeFiles/handprojector_tracker_main.dir/build.make CMakeFiles/handprojector_tracker_main.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
 # Help Target
@@ -223,8 +223,8 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
-	@echo "... handprojector_calibration"
-	@echo "... handprojector_calibration_main"
+	@echo "... handprojector_tracker"
+	@echo "... handprojector_tracker_main"
 	@echo "... install"
 	@echo "... install/local"
 	@echo "... install/strip"

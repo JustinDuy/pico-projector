@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.7 FATAL_ERROR)
-project(handprojector_calibration)
+project(handprojector_tracker)
 
 find_package(OpenCV REQUIRED)
 if( OpenCV_FOUND )

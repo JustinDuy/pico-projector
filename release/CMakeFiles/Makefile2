@@ -56,73 +56,73 @@ CMAKE_SOURCE_DIR = /home/duy/pico-projector
 CMAKE_BINARY_DIR = /home/duy/pico-projector/release
 
 #=============================================================================
-# Target rules for target CMakeFiles/handprojector_calibration.dir
+# Target rules for target CMakeFiles/handprojector_tracker.dir
 
 # All Build rule for target.
-CMakeFiles/handprojector_calibration.dir/all:
-	$(MAKE) -f CMakeFiles/handprojector_calibration.dir/build.make CMakeFiles/handprojector_calibration.dir/depend
-	$(MAKE) -f CMakeFiles/handprojector_calibration.dir/build.make CMakeFiles/handprojector_calibration.dir/build
+CMakeFiles/handprojector_tracker.dir/all:
+	$(MAKE) -f CMakeFiles/handprojector_tracker.dir/build.make CMakeFiles/handprojector_tracker.dir/depend
+	$(MAKE) -f CMakeFiles/handprojector_tracker.dir/build.make CMakeFiles/handprojector_tracker.dir/build
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/duy/pico-projector/release/CMakeFiles  1
-	@echo "Built target handprojector_calibration"
-.PHONY : CMakeFiles/handprojector_calibration.dir/all
+	@echo "Built target handprojector_tracker"
+.PHONY : CMakeFiles/handprojector_tracker.dir/all
 
 # Include target in all.
-all: CMakeFiles/handprojector_calibration.dir/all
+all: CMakeFiles/handprojector_tracker.dir/all
 .PHONY : all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/handprojector_calibration.dir/rule: cmake_check_build_system
+CMakeFiles/handprojector_tracker.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/duy/pico-projector/release/CMakeFiles 1
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/handprojector_calibration.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/handprojector_tracker.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/duy/pico-projector/release/CMakeFiles 0
-.PHONY : CMakeFiles/handprojector_calibration.dir/rule
+.PHONY : CMakeFiles/handprojector_tracker.dir/rule
 
 # Convenience name for target.
-handprojector_calibration: CMakeFiles/handprojector_calibration.dir/rule
-.PHONY : handprojector_calibration
+handprojector_tracker: CMakeFiles/handprojector_tracker.dir/rule
+.PHONY : handprojector_tracker
 
 # clean rule for target.
-CMakeFiles/handprojector_calibration.dir/clean:
-	$(MAKE) -f CMakeFiles/handprojector_calibration.dir/build.make CMakeFiles/handprojector_calibration.dir/clean
-.PHONY : CMakeFiles/handprojector_calibration.dir/clean
+CMakeFiles/handprojector_tracker.dir/clean:
+	$(MAKE) -f CMakeFiles/handprojector_tracker.dir/build.make CMakeFiles/handprojector_tracker.dir/clean
+.PHONY : CMakeFiles/handprojector_tracker.dir/clean
 
 # clean rule for target.
-clean: CMakeFiles/handprojector_calibration.dir/clean
+clean: CMakeFiles/handprojector_tracker.dir/clean
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/handprojector_calibration_main.dir
+# Target rules for target CMakeFiles/handprojector_tracker_main.dir
 
 # All Build rule for target.
-CMakeFiles/handprojector_calibration_main.dir/all: CMakeFiles/handprojector_calibration.dir/all
-	$(MAKE) -f CMakeFiles/handprojector_calibration_main.dir/build.make CMakeFiles/handprojector_calibration_main.dir/depend
-	$(MAKE) -f CMakeFiles/handprojector_calibration_main.dir/build.make CMakeFiles/handprojector_calibration_main.dir/build
+CMakeFiles/handprojector_tracker_main.dir/all: CMakeFiles/handprojector_tracker.dir/all
+	$(MAKE) -f CMakeFiles/handprojector_tracker_main.dir/build.make CMakeFiles/handprojector_tracker_main.dir/depend
+	$(MAKE) -f CMakeFiles/handprojector_tracker_main.dir/build.make CMakeFiles/handprojector_tracker_main.dir/build
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/duy/pico-projector/release/CMakeFiles  2
-	@echo "Built target handprojector_calibration_main"
-.PHONY : CMakeFiles/handprojector_calibration_main.dir/all
+	@echo "Built target handprojector_tracker_main"
+.PHONY : CMakeFiles/handprojector_tracker_main.dir/all
 
 # Include target in all.
-all: CMakeFiles/handprojector_calibration_main.dir/all
+all: CMakeFiles/handprojector_tracker_main.dir/all
 .PHONY : all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/handprojector_calibration_main.dir/rule: cmake_check_build_system
+CMakeFiles/handprojector_tracker_main.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/duy/pico-projector/release/CMakeFiles 2
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/handprojector_calibration_main.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/handprojector_tracker_main.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/duy/pico-projector/release/CMakeFiles 0
-.PHONY : CMakeFiles/handprojector_calibration_main.dir/rule
+.PHONY : CMakeFiles/handprojector_tracker_main.dir/rule
 
 # Convenience name for target.
-handprojector_calibration_main: CMakeFiles/handprojector_calibration_main.dir/rule
-.PHONY : handprojector_calibration_main
+handprojector_tracker_main: CMakeFiles/handprojector_tracker_main.dir/rule
+.PHONY : handprojector_tracker_main
 
 # clean rule for target.
-CMakeFiles/handprojector_calibration_main.dir/clean:
-	$(MAKE) -f CMakeFiles/handprojector_calibration_main.dir/build.make CMakeFiles/handprojector_calibration_main.dir/clean
-.PHONY : CMakeFiles/handprojector_calibration_main.dir/clean
+CMakeFiles/handprojector_tracker_main.dir/clean:
+	$(MAKE) -f CMakeFiles/handprojector_tracker_main.dir/build.make CMakeFiles/handprojector_tracker_main.dir/clean
+.PHONY : CMakeFiles/handprojector_tracker_main.dir/clean
 
 # clean rule for target.
-clean: CMakeFiles/handprojector_calibration_main.dir/clean
+clean: CMakeFiles/handprojector_tracker_main.dir/clean
 .PHONY : clean
 
 #=============================================================================
