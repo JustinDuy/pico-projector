@@ -3,6 +3,7 @@
 
 CMakeFiles/handprojector_calibration_main.dir/src/main.cpp.o: ../include/handprojector_calibration/graycode.h
 CMakeFiles/handprojector_calibration_main.dir/src/main.cpp.o: ../src/main.cpp
+CMakeFiles/handprojector_calibration_main.dir/src/main.cpp.o: ../src/rgbprocess.h
 CMakeFiles/handprojector_calibration_main.dir/src/main.cpp.o: /usr/include/qt4/Qt3Support/q3cstring.h
 CMakeFiles/handprojector_calibration_main.dir/src/main.cpp.o: /usr/include/qt4/Qt3Support/q3valuelist.h
 CMakeFiles/handprojector_calibration_main.dir/src/main.cpp.o: /usr/include/qt4/QtCore/QDebug

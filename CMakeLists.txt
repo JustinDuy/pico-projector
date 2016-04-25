@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.7 FATAL_ERROR)
-project(handprojector_tracker)
-
+project(handprojector_calibration)
+find_package(ROS REQUIRED)
 find_package(OpenCV REQUIRED)
 if( OpenCV_FOUND )
 list( APPEND ThirdParty_LIBS ${OpenCV_LIBS} )

@@ -10,8 +10,15 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/structured_light.hpp>
 
+#include <ros/ros.h>
+//#include <pcl_ros/point_cloud.h>
+//#include <sensor_msgs/PointCloud2.h>
+
+#include "rgbprocess.h"
+
 #include <iostream>
 //#define ___DEBUG 1
+#define _USEOPENNI
 using namespace cv;
 using namespace std;
 void project(Mat img);
@@ -27,14 +34,18 @@ static void help()
 void kroneckerProduct(const Mat& a, const Mat& b, Mat& product);
 
 void composeLinearSystem(const Mat& Ra, const Mat& ua, const Mat& Rb, const Mat& tb, Mat& M, int poseNum );
+#ifdef _USEOPENNI
 void capturePatterns(VideoCapture& capture, const vector<Mat>& pattern, vector<Mat>& captured_patterns, Mat& black_image, Mat& white_image);
+#else
+void capturePatterns(rgbProcess& capture, const vector<Mat>& pattern, vector<Mat>& captured_patterns, Mat& black_image, Mat& white_image);
+#endif
 void loadTestPatterns(int width, int height, const char* path, vector<Mat>& captured_patterns, Mat& black_image, Mat& white_image);
 String captured_path = "../captured/";
 
 int main( int argc, char** argv )
 {
     QApplication a(argc, argv);
-    
+
     //load Kinect calibration file
     FileStorage fs( "../data/rgb_A00363813595051A.yaml", FileStorage::READ );
     if( !fs.isOpened() )
@@ -64,7 +75,7 @@ int main( int argc, char** argv )
       cout << "Failed to load camera/projector calibration parameters" << endl;
       return -1;
     }
-    
+
     const size_t CAMERA_WIDTH = 640;//1280
     const size_t CAMERA_HEIGHT = 480;//720
     vector<Mat> pattern = ProjectorLocalizer::generatePatterns(CAMERA_WIDTH, CAMERA_HEIGHT);
@@ -78,6 +89,12 @@ int main( int argc, char** argv )
     moveWindow( "Pattern Window", CAMERA_WIDTH + 1000, 50 );
     //setWindowProperty( "Pattern Window", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN );
 #ifndef ___DEBUG
+
+#ifndef _USEOPENI
+    //USING LIBFREENECT TO GET RGB_D KINECT DATA :
+    ros::init(argc, argv, "rgbprocessor");
+    rgbProcess rgbProcessor;
+#else
     // Open kinect rgb cam, using openni
     VideoCapture capture( CV_CAP_OPENNI );
     if( !capture.isOpened() )
@@ -87,6 +104,8 @@ int main( int argc, char** argv )
       help();
       return -1;
     }
+#endif
+
 #endif
     bool known_Z = true;
     if(!known_Z){
@@ -107,7 +126,11 @@ int main( int argc, char** argv )
             vector<Mat> captured_patterns;
             Mat blackImage, whiteImage;
 #ifndef ___DEBUG
+#ifdef _USEOPENNI
             capturePatterns(capture, pattern, captured_patterns, blackImage, whiteImage);
+#else
+            capturePatterns(rgbProcessor, pattern, captured_patterns, blackImage, whiteImage);
+#endif
 #endif
             ProjectorLocalizer::estimateCameraProjectorPose(captured_patterns, CAMERA_WIDTH, CAMERA_HEIGHT, blackImage, whiteImage,
                                            cam1intrinsics, cam1distCoeffs, prointrinsics, Ra, ua);
@@ -138,7 +161,6 @@ int main( int argc, char** argv )
         ProjectorLocalizer::estimateCameraProjectorPose(captured_patterns, CAMERA_WIDTH, CAMERA_HEIGHT,
                                        blackImage, whiteImage,
                                        cam1intrinsics, cam1distCoeffs, prointrinsics, Ra, ta);
-#ifndef __DEBUG
         //read in Robot Hand-Base transformation : Rb,tb
         Mat Rb, tb;
         //read in Camera-Base transformation : Rz,tz
@@ -147,7 +169,6 @@ int main( int argc, char** argv )
         //compute Hand-Projector : Rx,tx
         Mat Rx = Ra.t()*(Rz*Rb);
         Mat tx = Ra.t()*(Rz*tb + tz - ta);
-#endif
     }
     // the camera will be deinitialized automatically in VideoCapture destructor
     return 0;
@@ -252,7 +273,7 @@ void loadTestPatterns(int width, int height, const char* path, vector<Mat>& capt
     //waitKey();
 
 }
-void capturePatterns(VideoCapture& capture, const vector<Mat>& pattern, vector<Mat>& captured_patterns, Mat& black_image, Mat& white_image) 
+void capturePatterns(VideoCapture& capture, const vector<Mat>& pattern, vector<Mat>& captured_patterns, Mat& black_image, Mat& white_image)
 {
     int i =0;
     while( i < pattern.size() )
@@ -263,10 +284,11 @@ void capturePatterns(VideoCapture& capture, const vector<Mat>& pattern, vector<M
           waitKey(500);
       else
           waitKey(250);
-
       Mat frame1;
+#ifdef _USEOPENI
       capture.grab();
       capture.retrieve( frame1, CV_CAP_OPENNI_BGR_IMAGE );
+#endif
 
       if(frame1.data )
       {
@@ -306,7 +328,7 @@ void capturePatterns(VideoCapture& capture, const vector<Mat>& pattern, vector<M
       }
     }
     //end while loop for capturing patterns
-    
+
 }
 
 

@@ -4,6 +4,7 @@
 CMakeFiles/handprojector_calibration_main.dir/src/main.cpp.o
  ../include/handprojector_calibration/graycode.h
  /home/duy/pico-projector/src/main.cpp
+ /home/duy/pico-projector/src/rgbprocess.h
  /usr/include/qt4/Qt3Support/q3cstring.h
  /usr/include/qt4/Qt3Support/q3valuelist.h
  /usr/include/qt4/QtCore/QDebug

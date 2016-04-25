@@ -33,7 +33,21 @@ opencv2/highgui.hpp
 -
 opencv2/structured_light.hpp
 -
+ros/ros.h
+-
+rgbprocess.h
+/home/duy/pico-projector/src/rgbprocess.h
 iostream
+-
+
+/home/duy/pico-projector/src/rgbprocess.h
+ros/ros.h
+-
+pcl_ros/point_cloud.h
+-
+sensor_msgs/PointCloud2.h
+-
+opencv2/imgproc.hpp
 -
 
 /usr/include/qt4/Qt3Support/q3cstring.h

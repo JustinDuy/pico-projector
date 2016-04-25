@@ -53,6 +53,6 @@ SET(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 SET(CMAKE_DEPEND_INFO_FILES
-  "CMakeFiles/handprojector_tracker.dir/DependInfo.cmake"
-  "CMakeFiles/handprojector_tracker_main.dir/DependInfo.cmake"
+  "CMakeFiles/handprojector_calibration.dir/DependInfo.cmake"
+  "CMakeFiles/handprojector_calibration_main.dir/DependInfo.cmake"
   )
